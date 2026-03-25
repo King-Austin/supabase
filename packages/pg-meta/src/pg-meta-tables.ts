@@ -123,13 +123,15 @@ function remove(
   table: Pick<PGTable, 'name' | 'schema'>,
   { cascade = false } = {}
 ): { sql: string } {
-  const sql = `DROP TABLE ${ident(table.schema)}.${ident(table.name)} ${
+  const sql = `-- source: dashboard\n-- description: Drop a table\nDROP TABLE ${ident(table.schema)}.${ident(table.name)} ${
     cascade ? 'CASCADE' : 'RESTRICT'
   };`
   return { sql }
 }
 
 const generateEnrichedTablesSql = ({ includeColumns }: { includeColumns?: boolean }) => `
+-- source: dashboard
+-- description: List all tables with metadata
   with tables as (${TABLES_SQL})
   ${includeColumns ? `, columns as (${COLUMNS_SQL})` : ''}
   select
@@ -154,10 +156,10 @@ function create({ name, schema = 'public', comment, no_transaction = false }: Ta
       : ''
 
   if (no_transaction) {
-    const sql = `${tableSql} ${commentSql}`
+    const sql = `-- source: dashboard\n-- description: Create a new table\n${tableSql} ${commentSql}`
     return { sql }
   }
-  const sql = `BEGIN; ${tableSql} ${commentSql} COMMIT;`
+  const sql = `-- source: dashboard\n-- description: Create a new table\nBEGIN; ${tableSql} ${commentSql} COMMIT;`
   return { sql }
 }
 
@@ -247,6 +249,8 @@ $$;
 
   // nameSql must be last, right below schemaSql
   const sql = `
+-- source: dashboard
+-- description: Update table properties
 BEGIN;
   ${enableRls}
   ${forceRls}

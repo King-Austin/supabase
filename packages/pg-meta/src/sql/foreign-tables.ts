@@ -1,4 +1,6 @@
 export const FOREIGN_TABLES_SQL = /* SQL */ `
+-- source: dashboard
+-- description: List all foreign tables with their server and data wrapper info
 select
   c.oid::int8 as id,
   n.nspname as schema,

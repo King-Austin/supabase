@@ -57,6 +57,8 @@ function list({
   zod: typeof pgColumnPrivilegesArrayZod
 } {
   let sql = `
+-- source: dashboard
+-- description: List all column privileges with metadata
   with column_privileges as (${COLUMN_PRIVILEGES_SQL})
   select *
   from column_privileges
@@ -96,6 +98,8 @@ function list({
 type ColumnPrivilegesGrant = z.infer<typeof privilegeGrant>
 function grant(grants: ColumnPrivilegesGrant[]): { sql: string } {
   const sql = `
+-- source: dashboard
+-- description: Grant column privilege on table
 do $$
 declare
   col record;
@@ -126,6 +130,8 @@ end $$;
 type ColumnPrivilegesRevoke = Omit<ColumnPrivilegesGrant, 'isGrantable'>
 function revoke(revokes: ColumnPrivilegesRevoke[]): { sql: string } {
   const sql = `
+-- source: dashboard
+-- description: Revoke column privilege from table
 do $$
 declare
   col record;

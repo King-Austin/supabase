@@ -1,4 +1,6 @@
 export const COLUMNS_SQL = /* SQL */ `
+-- source: dashboard
+-- description: List all columns with metadata for tables, views, and foreign tables
 -- Adapted from information_schema.columns
 
 SELECT

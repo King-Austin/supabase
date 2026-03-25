@@ -1,4 +1,6 @@
 export const MATERIALIZED_VIEWS_SQL = /* SQL */ `
+-- source: dashboard
+-- description: List all materialized views with schema and population status
 select
   c.oid::int8 as id,
   n.nspname as schema,

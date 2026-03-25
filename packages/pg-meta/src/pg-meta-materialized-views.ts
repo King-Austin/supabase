@@ -97,6 +97,8 @@ export function retrieve(identifier: MaterializedViewIdentifier): {
 }
 
 const generateEnrichedMaterializedViewsSql = ({ includeColumns }: { includeColumns?: boolean }) => `
+-- source: dashboard
+-- description: List all materialized views with metadata
 with materialized_views as (${MATERIALIZED_VIEWS_SQL})
   ${includeColumns ? `, columns as (${COLUMNS_SQL})` : ''}
 select

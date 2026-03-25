@@ -95,6 +95,8 @@ export function retrieve(identifier: ForeignTableIdentifier): {
 }
 
 const generateEnrichedForeignTablesSql = ({ includeColumns }: { includeColumns?: boolean }) => `
+-- source: dashboard
+-- description: List all foreign tables with metadata
 with foreign_tables as (${FOREIGN_TABLES_SQL})
   ${includeColumns ? `, columns as (${COLUMNS_SQL})` : ''}
 select

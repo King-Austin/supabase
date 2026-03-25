@@ -1,4 +1,6 @@
 export const VIEWS_SQL = /* SQL */ `
+-- source: dashboard
+-- description: List all views with updatability status and comments
 SELECT
   c.oid :: int8 AS id,
   n.nspname AS schema,
