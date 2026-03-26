@@ -211,23 +211,21 @@ export const SubscriptionPlanUpdateDialog = ({
         })
       : []
 
-  // Calculate remaining days in current billing cycle
-  const now = Math.floor(Date.now() / 1000) // current time in seconds
-  const remainingSeconds = subscription?.current_period_end - now
-  const totalSeconds = subscription?.current_period_end - subscription?.current_period_start
-  const remainingRatio = remainingSeconds / totalSeconds
-
-  // Calculate prorated credit for current plan
-  const currentPlanMonthlyPrice = currentPlanMeta?.price ?? 0
-  const proratedCredit = currentPlanMonthlyPrice * remainingRatio
+  const proratedCredit = subscriptionPreview?.prorated_credit ?? 0
 
   // Calculate new plan cost
   const newPlanCost = Number(subscriptionPlanMeta?.priceMonthly) ?? 0
 
   const customerBalance = ((subscription?.customer_balance ?? 0) / 100) * -1
 
-  // Calculate total charge (new plan - prorated credit)
-  const totalCharge = Math.max(0, newPlanCost - proratedCredit - customerBalance)
+  const taxAmount = subscriptionPreview?.tax?.tax_amount ?? 0
+
+  // Calculate total charge (new plan - prorated credit + tax)
+  const totalCharge = Math.max(0, newPlanCost - proratedCredit - customerBalance) + taxAmount
+
+  // Only show the itemized breakdown when there's more than just the plan cost
+  const hasBreakdownItems =
+    taxAmount > 0 || subscription?.plan?.id !== 'free' || customerBalance > 0
 
   return (
     <Dialog
@@ -294,24 +292,27 @@ export const SubscriptionPlanUpdateDialog = ({
               {subscriptionPreviewInitialized && (
                 <>
                   <div className="mt-2 mb-4 text-foreground-light text-sm">
-                    <div className="flex items-center justify-between gap-2 border-b border-muted text-foreground">
-                      <div className="py-2 pl-0">Charge today</div>
-                      <div className="py-2 pr-0 text-right" translate="no">
-                        {formatCurrency(totalCharge)}
-                        {subscription?.plan?.id !== 'free' && (
-                          <>
-                            {' '}
-                            <Link
-                              href={`/org/${selectedOrganization?.slug}/billing#breakdown`}
-                              className="text-sm text-brand hover:text-brand-600 transition"
-                              target="_blank"
-                            >
-                              + current spend
-                            </Link>
-                          </>
-                        )}
+                    {hasBreakdownItems && (
+                      <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
+                        <div className="py-2 pl-0 flex items-center gap-1">
+                          <span>{subscriptionPlanMeta?.name} Plan</span>
+                        </div>
+                        <div className="py-2 pr-0 text-right" translate="no">
+                          {formatCurrency(newPlanCost)}
+                        </div>
                       </div>
-                    </div>
+                    )}
+
+                    {subscriptionPreview?.tax != null && subscriptionPreview.tax.tax_amount > 0 && (
+                      <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
+                        <div className="py-2 pl-0 flex items-center gap-1">
+                          <span>Tax</span>
+                        </div>
+                        <div className="py-2 pr-0 text-right" translate="no">
+                          {formatCurrency(subscriptionPreview.tax.tax_amount)}
+                        </div>
+                      </div>
+                    )}
 
                     {subscription?.plan?.id !== 'free' && (
                       <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
@@ -340,12 +341,31 @@ export const SubscriptionPlanUpdateDialog = ({
                           </InfoTooltip>
                         </div>
                         <div className="py-2 pr-0 text-right" translate="no">
-                          {formatCurrency(customerBalance)}
+                          -{formatCurrency(customerBalance)}
                         </div>
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between gap-2 text-foreground-lighter text-xs">
+                    <div className="flex items-center justify-between gap-2 border-b border-muted text-foreground">
+                      <div className="py-2 pl-0">Charged today</div>
+                      <div className="py-2 pr-0 text-right" translate="no">
+                        {formatCurrency(totalCharge)}
+                        {subscription?.plan?.id !== 'free' && (
+                          <>
+                            {' '}
+                            <Link
+                              href={`/org/${selectedOrganization?.slug}/billing#breakdown`}
+                              className="text-sm text-brand hover:text-brand-600 transition"
+                              target="_blank"
+                            >
+                              + current spend
+                            </Link>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 text-foreground-lighter text-xs mt-4">
                       <div className="py-2 pl-0 flex items-center gap-1">
                         <span>Monthly invoice estimate</span>
                         <InfoTooltip side="right">
@@ -553,6 +573,9 @@ export const SubscriptionPlanUpdateDialog = ({
                               0
                             ) ?? 0
                           )
+                        )}
+                        {subscriptionPreview?.tax != null && (
+                          <span className="text-foreground-lighter"> + applicable taxes</span>
                         )}
                       </div>
                     </div>

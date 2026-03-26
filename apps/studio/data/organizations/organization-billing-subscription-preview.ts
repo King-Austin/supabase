@@ -43,6 +43,13 @@ export type OrganizationBillingSubscriptionPreviewResponse = {
     ref: string
   }[]
   billed_via_partner?: boolean
+  tax?: {
+    tax_amount: number
+    total_amount_excluding_tax: number
+    total_amount_including_tax: number
+    currency: string
+  }
+  prorated_credit: number
 }
 
 export async function previewOrganizationBillingSubscription({
