@@ -52,6 +52,7 @@ export type OrganizationBillingSubscriptionPreviewResponse = {
       tax_amount: number
       total_amount_excluding_tax: number
       total_amount_including_tax: number
+      tax_rate_percentage: number
       currency: string
     }
   }

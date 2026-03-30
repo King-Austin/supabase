@@ -303,18 +303,6 @@ export const SubscriptionPlanUpdateDialog = ({
                       </div>
                     )}
 
-                    {subscriptionPreview?.upfront_charge?.tax != null &&
-                      subscriptionPreview.upfront_charge.tax.tax_amount > 0 && (
-                        <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
-                          <div className="py-2 pl-0 flex items-center gap-1">
-                            <span>Tax</span>
-                          </div>
-                          <div className="py-2 pr-0 text-right" translate="no">
-                            {formatCurrency(subscriptionPreview.upfront_charge.tax.tax_amount)}
-                          </div>
-                        </div>
-                      )}
-
                     {subscription?.plan?.id !== 'free' && (
                       <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
                         <div className="py-2 pl-0 flex items-center gap-1">
@@ -331,6 +319,32 @@ export const SubscriptionPlanUpdateDialog = ({
                         </div>
                       </div>
                     )}
+
+                    {subscriptionPreview?.upfront_charge?.tax != null &&
+                      subscriptionPreview.upfront_charge.tax.tax_amount > 0 && (
+                        <>
+                          {subscriptionPreview.upfront_charge.taxable_amount !== newPlanCost && (
+                            <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
+                              <div className="py-2 pl-0 flex items-center gap-1">
+                                <span>Subtotal</span>
+                              </div>
+                              <div className="py-2 pr-0 text-right" translate="no">
+                                {formatCurrency(subscriptionPreview.upfront_charge.taxable_amount)}
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
+                            <div className="py-2 pl-0 flex items-center gap-1">
+                              <span>
+                                Tax ({subscriptionPreview.upfront_charge.tax.tax_rate_percentage}%)
+                              </span>
+                            </div>
+                            <div className="py-2 pr-0 text-right" translate="no">
+                              {formatCurrency(subscriptionPreview.upfront_charge.tax.tax_amount)}
+                            </div>
+                          </div>
+                        </>
+                      )}
 
                     {/* Ignore rare case with negative balance (debt) */}
                     {customerBalance > 0 && (
@@ -543,7 +557,7 @@ export const SubscriptionPlanUpdateDialog = ({
 
                                     <TableRow>
                                       <TableCell className="font-medium py-2 px-0">
-                                        Total per month (excluding other usage)
+                                        Total per month (excluding other usage and applicable tax)
                                       </TableCell>
                                       <TableCell
                                         className="text-right font-medium py-2 px-0"
@@ -575,8 +589,8 @@ export const SubscriptionPlanUpdateDialog = ({
                             ) ?? 0
                           )
                         )}
-                        {subscriptionPreview?.tax != null && (
-                          <span className="text-foreground-lighter"> + applicable taxes</span>
+                        {subscriptionPreview?.upfront_charge.tax != null && (
+                          <span className="text-foreground-lighter"> + applicable tax</span>
                         )}
                       </div>
                     </div>
