@@ -20,8 +20,8 @@ interface AdvisorPanelHeaderProps {
 export const AdvisorPanelHeader = ({ selectedItem, onBack, onClose }: AdvisorPanelHeaderProps) => {
   const displayTitle = selectedItem ? getAdvisorItemDisplayTitle(selectedItem) : undefined
   const metadataText = selectedItem
-    ? getAdvisorItemSecondaryText(selectedItem) ??
-      (selectedItem.createdAt ? formatItemDate(selectedItem.createdAt) : undefined)
+    ? (getAdvisorItemSecondaryText(selectedItem) ??
+      (selectedItem.createdAt ? formatItemDate(selectedItem.createdAt) : undefined))
     : undefined
 
   return (
@@ -34,10 +34,12 @@ export const AdvisorPanelHeader = ({ selectedItem, onBack, onClose }: AdvisorPan
         tooltip={{ content: { side: 'bottom', text: 'Back to list' } }}
       />
       <div className="flex items-center gap-2 overflow-hidden flex-1">
-        <div className="flex-1 flex flex-col gap-0.5">
+        <div className="flex-1 flex flex-col">
           <span className="heading-default">{displayTitle}</span>
           {metadataText && (
-            <span className="text-xs text-foreground-light capitalize-sentence">{metadataText}</span>
+            <span className="text-xs text-foreground-light capitalize-sentence">
+              {metadataText}
+            </span>
           )}
         </div>
         {selectedItem && (
