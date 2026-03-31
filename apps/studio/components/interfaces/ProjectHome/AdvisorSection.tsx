@@ -6,6 +6,7 @@ import { AiAssistantDropdown } from 'components/ui/AiAssistantDropdown'
 import { useProjectLintsQuery } from 'data/lint/lint-query'
 import { useTrack } from 'lib/telemetry/track'
 import { BarChart, Shield } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import { useCallback, useMemo } from 'react'
 import { useAdvisorStateSnapshot } from 'state/advisor-state'
 import { useAiAssistantStateSnapshot } from 'state/ai-assistant-state'
@@ -23,6 +24,19 @@ import {
 } from '../../ui/AdvisorPanel/AdvisorPanel.utils'
 import { useAdvisorSignals } from '../../ui/AdvisorPanel/useAdvisorSignals'
 import { Markdown } from '../Markdown'
+
+const getAdvisorTileStyle = (severity: AdvisorItem['severity']): CSSProperties | undefined => {
+  if (severity !== 'critical' && severity !== 'warning') return undefined
+
+  const shadowColorVariable =
+    severity === 'critical' ? '--destructive-default' : '--warning-default'
+
+  return {
+    '--tw-shadow': `8px -8px 0 0 hsl(var(${shadowColorVariable}))`,
+    boxShadow:
+      'var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)',
+  } as CSSProperties
+}
 
 export const AdvisorSection = ({ showEmptyState = false }: { showEmptyState?: boolean }) => {
   const { ref: projectRef } = useParams()
@@ -141,6 +155,7 @@ export const AdvisorSection = ({ showEmptyState = false }: { showEmptyState?: bo
                 <Card
                   key={`${item.source}-${item.id}`}
                   className="min-h-full flex flex-col items-stretch cursor-pointer h-64"
+                  style={getAdvisorTileStyle(item.severity)}
                   onClick={() => {
                     handleCardClick(item)
                   }}
