@@ -100,7 +100,8 @@ export const AdvisorPanelBody = ({
 
           const primaryText = getAdvisorPanelItemDisplayTitle(item)
           const secondaryText = getAdvisorItemSecondaryText(item)
-          const metadataText = secondaryText ?? (item.createdAt ? formatItemDate(item.createdAt) : undefined)
+          const metadataText =
+            secondaryText ?? (item.createdAt ? formatItemDate(item.createdAt) : undefined)
 
           return (
             <div key={`${item.source}-${item.id}`} className="border-b">

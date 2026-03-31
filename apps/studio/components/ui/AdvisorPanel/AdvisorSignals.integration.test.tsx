@@ -222,9 +222,7 @@ describe('Advisor signals integration', () => {
         )
       ).length
     ).toBeGreaterThan(0)
-    expect(
-      screen.getByRole('link', { name: 'Learn more' })
-    ).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute(
       'href',
       'https://supabase.com/docs/guides/storage/buckets/fundamentals#public-buckets'
     )
@@ -240,9 +238,7 @@ describe('Advisor signals integration', () => {
         )
       ).length
     ).toBeGreaterThan(0)
-    expect(
-      screen.getByRole('link', { name: 'Learn more' })
-    ).toHaveAttribute(
+    expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute(
       'href',
       'https://supabase.com/docs/reference/cli/supabase-network-bans'
     )

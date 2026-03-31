@@ -52,15 +52,15 @@ export const AdvisorSignalDetail = ({ item, onDismiss }: AdvisorSignalDetailProp
   const issueDescription =
     item.sourceData.type === 'banned-ip' ? (
       <>
-        The IP address <code className="text-code-inline">{item.sourceData.ip}</code> is
-        temporarily blocked because of suspicious traffic or repeated failed password attempts. If
-        this block is expected, you can dismiss this signal or remove the ban.
+        The IP address <code className="text-code-inline">{item.sourceData.ip}</code> is temporarily
+        blocked because of suspicious traffic or repeated failed password attempts. If this block is
+        expected, you can dismiss this signal or remove the ban.
       </>
     ) : (
       <>
-        The bucket <code className="text-code-inline">{item.sourceData.bucketId}</code> is
-        publicly readable, so anyone can list and access objects stored in it. Public buckets are
-        often intentional, and you can dismiss this signal if that is expected.
+        The bucket <code className="text-code-inline">{item.sourceData.bucketId}</code> is publicly
+        readable, so anyone can list and access objects stored in it. Public buckets are often
+        intentional, and you can dismiss this signal if that is expected.
       </>
     )
 

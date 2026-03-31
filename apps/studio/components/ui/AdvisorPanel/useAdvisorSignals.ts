@@ -2,10 +2,7 @@ import { useBannedIPsQuery } from 'data/banned-ips/banned-ips-query'
 import { useBucketsQuery } from 'data/storage/buckets-query'
 import { useMemo } from 'react'
 
-import {
-  createAdvisorSignalItems,
-  getAdvisorDebugBannedIPs,
-} from './AdvisorPanel.utils'
+import { createAdvisorSignalItems, getAdvisorDebugBannedIPs } from './AdvisorPanel.utils'
 import { useAdvisorSignalDismissals } from './useAdvisorSignalDismissals'
 
 interface UseAdvisorSignalsOptions {
@@ -18,9 +15,7 @@ export const useAdvisorSignals = ({
   enabled = true,
 }: UseAdvisorSignalsOptions = {}) => {
   // TODO(DEPR-430): Remove this local-only shim once network bans can be created for local testing.
-  const debugBannedIPs = getAdvisorDebugBannedIPs(
-    process.env.NEXT_PUBLIC_ADVISOR_DEBUG_BANNED_IPS
-  )
+  const debugBannedIPs = getAdvisorDebugBannedIPs(process.env.NEXT_PUBLIC_ADVISOR_DEBUG_BANNED_IPS)
 
   const bannedIPsQuery = useBannedIPsQuery(
     { projectRef },
