@@ -20,6 +20,8 @@ import {
   getAdvisorItemDisplayTitle,
   MAX_HOMEPAGE_ADVISOR_ITEMS,
   severityBadgeVariants,
+  severityCardGradientClasses,
+  severityColorClasses,
   sortAdvisorItems,
 } from '../../ui/AdvisorPanel/AdvisorPanel.utils'
 import { useAdvisorSignals } from '../../ui/AdvisorPanel/useAdvisorSignals'
@@ -135,13 +137,14 @@ export const AdvisorSection = ({ showEmptyState = false }: { showEmptyState?: bo
             {visibleAdvisorItems.map((item) => {
               const isLint = item.source === 'lint'
               const categoryLabel = item.tab === 'performance' ? 'PERFORMANCE' : 'SECURITY'
+              const title = item.source === 'signal' ? item.title : getAdvisorItemDisplayTitle(item)
               const description =
                 item.source === 'signal' ? item.description : isLint ? item.original.detail : ''
 
               return (
                 <Card
                   key={`${item.source}-${item.id}`}
-                  className="min-h-full flex flex-col items-stretch cursor-pointer h-64"
+                  className={`min-h-full flex flex-col items-stretch cursor-pointer h-64 ${severityCardGradientClasses[item.severity]}`}
                   onClick={() => {
                     handleCardClick(item)
                   }}
@@ -149,9 +152,17 @@ export const AdvisorSection = ({ showEmptyState = false }: { showEmptyState?: bo
                   <CardHeader className="border-b-0 shrink-0 flex flex-row gap-2 space-y-0 justify-between items-center">
                     <div className="flex flex-row items-center gap-3">
                       {item.tab === 'security' ? (
-                        <Shield size={16} strokeWidth={1.5} className="text-foreground-muted" />
+                        <Shield
+                          size={16}
+                          strokeWidth={1.5}
+                          className={severityColorClasses[item.severity]}
+                        />
                       ) : (
-                        <BarChart size={16} strokeWidth={1.5} className="text-foreground-muted" />
+                        <BarChart
+                          size={16}
+                          strokeWidth={1.5}
+                          className={severityColorClasses[item.severity]}
+                        />
                       )}
                       <CardTitle className="text-foreground-light">{categoryLabel}</CardTitle>
                     </div>
@@ -193,7 +204,7 @@ export const AdvisorSection = ({ showEmptyState = false }: { showEmptyState?: bo
                     </div>
                   </CardHeader>
                   <CardContent className="p-6 pt-16 flex flex-col justify-end flex-1 overflow-auto">
-                    <h3 className="mb-1">{getAdvisorItemDisplayTitle(item)}</h3>
+                    <h3 className="mb-1">{title}</h3>
                     <Markdown className="leading-6 text-sm text-foreground-light">
                       {description && description.replace(/\\`/g, '`')}
                     </Markdown>

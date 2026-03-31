@@ -188,21 +188,25 @@ describe('Advisor signals integration', () => {
     )
 
     expect(screen.getByText('Advisor found 3 issues')).toBeInTheDocument()
-    expect(screen.getByText('Public storage bucket: avatars')).toBeInTheDocument()
-    expect(screen.getByText('Banned IP address: 203.0.113.10')).toBeInTheDocument()
+    expect(screen.getByText('Public storage bucket')).toBeInTheDocument()
+    expect(screen.getByText('Banned IP address')).toBeInTheDocument()
     expect(screen.getAllByText('Critical lint detail').length).toBeGreaterThan(0)
     expect(
-      screen.getByText(
-        'A bucket is publicly readable, so anyone can list and access objects stored in it.'
-      )
-    ).toBeInTheDocument()
+      screen.getAllByText((_, node) =>
+        Boolean(
+          node?.textContent?.includes(
+            'The bucket avatars is publicly readable, so anyone can list and access objects stored in it.'
+          )
+        )
+      ).length
+    ).toBeGreaterThan(0)
     expect(
       screen.queryByText(
         'Public buckets are often intentional, and you can dismiss this signal if that is expected.'
       )
     ).not.toBeInTheDocument()
 
-    await userEvent.click(screen.getByText('Public storage bucket: avatars'))
+    await userEvent.click(screen.getByText('Public storage bucket'))
 
     expect(screen.getByText('Entity')).toBeInTheDocument()
     expect(screen.getByText('Issue')).toBeInTheDocument()
@@ -225,7 +229,7 @@ describe('Advisor signals integration', () => {
       'https://supabase.com/docs/guides/storage/buckets/fundamentals#public-buckets'
     )
 
-    await userEvent.click(screen.getByText('Banned IP address: 203.0.113.10'))
+    await userEvent.click(screen.getByText('Banned IP address'))
 
     expect(
       screen.getAllByText((_, node) =>
@@ -243,17 +247,17 @@ describe('Advisor signals integration', () => {
       'https://supabase.com/docs/reference/cli/supabase-network-bans'
     )
 
-    await userEvent.click(screen.getByText('Public storage bucket: avatars'))
+    await userEvent.click(screen.getByText('Public storage bucket'))
 
-    expect(screen.getAllByText('Public storage bucket: avatars').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Public storage bucket').length).toBeGreaterThan(0)
 
     await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
 
     await waitFor(() => {
-      expect(screen.queryByText('Public storage bucket: avatars')).not.toBeInTheDocument()
+      expect(screen.queryByText('Public storage bucket')).not.toBeInTheDocument()
     })
 
-    expect(screen.getAllByText('Banned IP address: 203.0.113.10').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Banned IP address').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Critical lint detail').length).toBeGreaterThan(0)
   })
 
@@ -284,6 +288,15 @@ describe('Advisor signals integration', () => {
       </>
     )
 
-    expect(screen.getAllByText('Banned IP address: 203.0.113.77').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Banned IP address').length).toBeGreaterThan(0)
+    expect(
+      screen.getAllByText((_, node) =>
+        Boolean(
+          node?.textContent?.includes(
+            'The IP address 203.0.113.77 is temporarily blocked because of suspicious traffic or repeated failed password attempts.'
+          )
+        )
+      ).length
+    ).toBeGreaterThan(0)
   })
 })

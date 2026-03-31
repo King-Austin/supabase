@@ -60,7 +60,14 @@ export const createPublicBucketSignalFingerprint = (bucketId: string) =>
 export const getAdvisorDebugBannedIPs = (rawValue?: string): string[] => {
   if (!rawValue) return []
 
-  return [...new Set(rawValue.split(',').map((ip) => ip.trim()).filter(Boolean))]
+  return [
+    ...new Set(
+      rawValue
+        .split(',')
+        .map((ip) => ip.trim())
+        .filter(Boolean)
+    ),
+  ]
 }
 
 const getSignalResourceLabel = (item: AdvisorSignalItem) =>
@@ -146,7 +153,7 @@ export const createAdvisorSignalItems = ({
     tab: 'security' as const,
     title: 'Banned IP address',
     description:
-      'An IP address is temporarily blocked because of suspicious traffic or repeated failed password attempts.',
+      `The IP address \`${ip}\` is temporarily blocked because of suspicious traffic or repeated failed password attempts.`,
     detailDescription:
       'This IP address is temporarily blocked because of suspicious traffic or repeated failed password attempts. If this block is expected, you can dismiss this signal or remove the ban.',
     learnMoreHref: 'https://supabase.com/docs/reference/cli/supabase-network-bans',
@@ -171,11 +178,10 @@ export const createAdvisorSignalItems = ({
       tab: 'security' as const,
       title: 'Public storage bucket',
       description:
-        'A bucket is publicly readable, so anyone can list and access objects stored in it.',
+        `The bucket \`${bucket.id}\` is publicly readable, so anyone can list and access objects stored in it.`,
       detailDescription:
         'This bucket is publicly readable, so anyone can list and access objects stored in it. Public buckets are often intentional, and you can dismiss this signal if that is expected.',
-      learnMoreHref:
-        'https://supabase.com/docs/guides/storage/buckets/fundamentals#public-buckets',
+      learnMoreHref: 'https://supabase.com/docs/guides/storage/buckets/fundamentals#public-buckets',
       actions: [
         {
           label: 'Edit bucket',
@@ -264,6 +270,15 @@ export const severityBadgeVariants: Record<AdvisorSeverity, 'destructive' | 'war
     warning: 'warning',
     info: 'default',
   }
+
+/** TR → BL wash for advisor cards; pairs with default card `bg-surface-100`. */
+export const severityCardGradientClasses: Record<AdvisorSeverity, string> = {
+  critical:
+    'border-destructive-600/30 dark:border-destructive-500/50 bg-gradient-to-bl from-destructive-500/5 via-destructive-500/[0.03] via-[25%] dark:via-[42%] to-transparent to-[60%] dark:to-[88%]',
+  warning:
+    'border-warning-600/30 dark:border-warning-500/50 bg-gradient-to-bl from-warning-500/5 via-warning-500/[0.03] via-[25%] dark:via-[42%] to-transparent to-[60%] dark:to-[88%]',
+  info: '',
+}
 
 export const severityLabels: Record<AdvisorSeverity, string> = {
   critical: 'Critical',
