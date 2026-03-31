@@ -292,7 +292,7 @@ export const SubscriptionPlanUpdateDialog = ({
               {subscriptionPreviewInitialized && (
                 <>
                   <div className="mt-2 mb-4 text-foreground-light text-sm">
-                    {hasBreakdownItems && (
+                    {hasBreakdownItems && changeType !== 'downgrade' && (
                       <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
                         <div className="py-2 pl-0 flex items-center gap-1">
                           <span>{subscriptionPlanMeta?.name} Plan</span>
