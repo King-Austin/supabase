@@ -33,6 +33,7 @@ export type AdvisorSignalItem = AdvisorBaseItem & {
   signalType: AdvisorSignalType
   fingerprint: string
   description: string
+  detailDescription?: string
   learnMoreHref?: string
   actions: AdvisorSignalAction[]
   sourceData:

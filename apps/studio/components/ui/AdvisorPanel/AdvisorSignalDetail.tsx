@@ -14,6 +14,7 @@ export const AdvisorSignalDetail = ({ item, onDismiss }: AdvisorSignalDetailProp
   const contextLabel = item.sourceData.type === 'banned-ip' ? 'IP address' : 'Bucket'
   const contextValue =
     item.sourceData.type === 'banned-ip' ? item.sourceData.ip : item.sourceData.bucketId
+  const detailDescription = item.detailDescription ?? item.description
 
   return (
     <div>
@@ -24,7 +25,7 @@ export const AdvisorSignalDetail = ({ item, onDismiss }: AdvisorSignalDetailProp
 
       <h3 className="text-sm mb-2">Why this appears</h3>
       <p className="text-sm leading-6 text-foreground-light mb-6">
-        {item.description}{' '}
+        {detailDescription}{' '}
         {item.learnMoreHref !== undefined && (
           <InlineLink href={item.learnMoreHref}>Learn more</InlineLink>
         )}

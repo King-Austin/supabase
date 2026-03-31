@@ -191,6 +191,16 @@ describe('Advisor signals integration', () => {
     expect(screen.getByText('Public storage bucket: avatars')).toBeInTheDocument()
     expect(screen.getByText('Banned IP address: 203.0.113.10')).toBeInTheDocument()
     expect(screen.getAllByText('Critical lint detail').length).toBeGreaterThan(0)
+    expect(
+      screen.getByText(
+        'This bucket is publicly readable, so anyone can list and access objects stored in it.'
+      )
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByText(
+        'Public buckets are often intentional, and you can dismiss this signal if that is expected.'
+      )
+    ).not.toBeInTheDocument()
 
     await userEvent.click(screen.getByText('Public storage bucket: avatars'))
 
