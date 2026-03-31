@@ -204,7 +204,11 @@ describe('Advisor signals integration', () => {
 
     await userEvent.click(screen.getByText('Public storage bucket: avatars'))
 
-    expect(screen.getByText('Why this appears')).toBeInTheDocument()
+    expect(screen.getByText('Entity')).toBeInTheDocument()
+    expect(screen.getByText('Issue')).toBeInTheDocument()
+    expect(screen.getByText('Resolve')).toBeInTheDocument()
+    expect(screen.getAllByTestId('advisor-assistant-dropdown').length).toBeGreaterThan(0)
+    expect(screen.getByText('avatars')).toBeInTheDocument()
     expect(
       screen.getAllByText(/This bucket is publicly readable, so anyone can list and access objects/)
         .length
