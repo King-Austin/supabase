@@ -152,7 +152,7 @@ export const createAdvisorSignalItems = ({
     learnMoreHref: 'https://supabase.com/docs/reference/cli/supabase-network-bans',
     actions: [
       {
-        label: 'Open network bans',
+        label: 'Edit network bans',
         href: `/project/${projectRef}/database/settings#banned-ips`,
       },
     ],
@@ -178,8 +178,8 @@ export const createAdvisorSignalItems = ({
         'https://supabase.com/docs/guides/storage/buckets/fundamentals#public-buckets',
       actions: [
         {
-          label: 'Open bucket',
-          href: `/project/${projectRef}/storage/files/buckets/${encodeURIComponent(bucket.id)}`,
+          label: 'Edit bucket',
+          href: `/project/${projectRef}/storage/files/buckets/${encodeURIComponent(bucket.id)}?edit=true`,
         },
       ],
       sourceData: {
