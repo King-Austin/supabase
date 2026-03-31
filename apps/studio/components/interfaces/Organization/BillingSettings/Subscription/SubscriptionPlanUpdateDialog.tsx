@@ -589,7 +589,7 @@ export const SubscriptionPlanUpdateDialog = ({
                             ) ?? 0
                           )
                         )}
-                        {subscriptionPreview?.upfront_charge.tax != null && (
+                        {subscriptionPreview?.upfront_charge?.tax != null && (
                           <span className="text-foreground-lighter"> + applicable tax</span>
                         )}
                       </div>
