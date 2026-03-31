@@ -1,5 +1,4 @@
-import { Lint } from 'data/lint/lint-query'
-import { Notification } from 'data/notifications/notifications-v2-query'
+import type { Notification } from 'data/notifications/notifications-v2-query'
 import { AlertTriangle, ChevronRight, Inbox } from 'lucide-react'
 import { AdvisorSeverity, AdvisorTab } from 'state/advisor-state'
 import { Badge, Button, cn } from 'ui'
@@ -9,7 +8,7 @@ import type { AdvisorItem } from './AdvisorPanel.types'
 import {
   formatItemDate,
   getAdvisorItemDisplayTitle,
-  getLintEntityString,
+  getAdvisorItemSecondaryText,
   severityBadgeVariants,
   severityColorClasses,
   severityLabels,
@@ -98,14 +97,10 @@ export const AdvisorPanelBody = ({
           const isNotification = item.source === 'notification'
           const notification = isNotification ? (item.original as Notification) : null
           const isUnread = notification?.status === 'new'
-          const lint = !isNotification ? (item.original as Lint) : null
 
-          // Primary text: issue type for lint items, title for notifications
           const primaryText = getAdvisorItemDisplayTitle(item)
-
-          // Secondary text: entity for lint items when no date, date for notifications
           const hasDate = !!item.createdAt
-          const entityString = getLintEntityString(lint)
+          const secondaryText = getAdvisorItemSecondaryText(item)
 
           return (
             <div key={`${item.source}-${item.id}`} className="border-b">
@@ -131,9 +126,9 @@ export const AdvisorPanelBody = ({
                           {formatItemDate(item.createdAt!)}
                         </span>
                       ) : (
-                        entityString && (
+                        secondaryText && (
                           <div className="flex items-center gap-1 text-xs text-foreground-light">
-                            <span className="truncate">{entityString}</span>
+                            <span className="truncate">{secondaryText}</span>
                           </div>
                         )
                       )}

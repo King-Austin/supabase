@@ -1,10 +1,187 @@
+import { lintInfoMap } from 'components/interfaces/Linter/Linter.utils'
+import type { IPData } from 'data/banned-ips/banned-ips-query'
+import type { Lint } from 'data/lint/lint-query'
+import type { Notification, NotificationData } from 'data/notifications/notifications-v2-query'
+import type { Bucket } from 'data/storage/buckets-query'
 import dayjs from 'dayjs'
 import { Gauge, Inbox, Shield } from 'lucide-react'
-
-import { lintInfoMap } from 'components/interfaces/Linter/Linter.utils'
-import { Lint } from 'data/lint/lint-query'
+import type { ElementType } from 'react'
 import { AdvisorSeverity, AdvisorTab } from 'state/advisor-state'
-import type { AdvisorItem } from './AdvisorPanel.types'
+
+import type {
+  AdvisorItem,
+  AdvisorLintItem,
+  AdvisorNotificationItem,
+  AdvisorSignalItem,
+} from './AdvisorPanel.types'
+
+export const MAX_HOMEPAGE_ADVISOR_ITEMS = 4
+
+export const severityOrder: Record<AdvisorSeverity, number> = {
+  critical: 0,
+  warning: 1,
+  info: 2,
+}
+
+export const lintLevelToSeverity = (level: Lint['level']): AdvisorSeverity => {
+  switch (level) {
+    case 'ERROR':
+      return 'critical'
+    case 'WARN':
+      return 'warning'
+    default:
+      return 'info'
+  }
+}
+
+export const notificationPriorityToSeverity = (
+  priority: string | null | undefined
+): AdvisorSeverity => {
+  switch (priority) {
+    case 'Critical':
+      return 'critical'
+    case 'Warning':
+      return 'warning'
+    default:
+      return 'info'
+  }
+}
+
+export const createAdvisorSignalDismissalStorageKey = (projectRef: string) =>
+  `advisor-signal-dismissals:${projectRef}`
+
+export const createBannedIPSignalFingerprint = (ip: string) => `signal:banned-ip:${ip}:v1`
+
+export const createPublicBucketSignalFingerprint = (bucketId: string) =>
+  `signal:public-bucket:${bucketId}:v1`
+
+const getSignalResourceLabel = (item: AdvisorSignalItem) =>
+  item.sourceData.type === 'banned-ip' ? item.sourceData.ip : item.sourceData.bucketId
+
+const toTimestamp = (value?: string) => {
+  if (!value) return undefined
+
+  const timestamp = dayjs(value).valueOf()
+  return Number.isNaN(timestamp) ? undefined : timestamp
+}
+
+export const createAdvisorLintItems = (lintData?: Lint[]): AdvisorLintItem[] => {
+  if (!lintData) return []
+
+  return lintData
+    .map((lint): AdvisorLintItem | null => {
+      const categories = lint.categories || []
+      const tab = categories.includes('SECURITY')
+        ? ('security' as const)
+        : categories.includes('PERFORMANCE')
+          ? ('performance' as const)
+          : undefined
+
+      if (!tab) return null
+
+      return {
+        id: lint.cache_key,
+        title: lint.detail,
+        severity: lintLevelToSeverity(lint.level),
+        createdAt: undefined,
+        tab,
+        source: 'lint',
+        original: lint,
+      }
+    })
+    .filter((item): item is AdvisorLintItem => item !== null)
+}
+
+export const createAdvisorNotificationItems = (
+  notifications?: Notification[]
+): AdvisorNotificationItem[] => {
+  if (!notifications) return []
+
+  return notifications.map((notification) => {
+    const data = notification.data as NotificationData
+
+    return {
+      id: notification.id,
+      title: data.title,
+      severity: notificationPriorityToSeverity(notification.priority),
+      createdAt: dayjs(notification.inserted_at).valueOf(),
+      tab: 'messages' as const,
+      source: 'notification' as const,
+      original: notification,
+    }
+  })
+}
+
+export const createAdvisorSignalItems = ({
+  projectRef,
+  bannedIPsData,
+  buckets,
+}: {
+  projectRef?: string
+  bannedIPsData?: IPData
+  buckets?: Bucket[]
+}): AdvisorSignalItem[] => {
+  if (!projectRef) return []
+
+  const bannedIpSignals = (bannedIPsData?.banned_ipv4_addresses ?? []).map((ip) => ({
+    id: createBannedIPSignalFingerprint(ip),
+    fingerprint: createBannedIPSignalFingerprint(ip),
+    source: 'signal' as const,
+    signalType: 'banned-ip' as const,
+    severity: 'warning' as const,
+    tab: 'security' as const,
+    title: 'Banned IP address',
+    description:
+      'This IP address is temporarily blocked because of suspicious traffic or repeated failed password attempts.',
+    actions: [
+      {
+        label: 'Open network bans',
+        href: `/project/${projectRef}/database/settings#banned-ips`,
+      },
+    ],
+    sourceData: { type: 'banned-ip' as const, ip },
+  }))
+
+  const publicBucketSignals = (buckets ?? [])
+    .filter((bucket) => bucket.public)
+    .map((bucket) => ({
+      id: createPublicBucketSignalFingerprint(bucket.id),
+      fingerprint: createPublicBucketSignalFingerprint(bucket.id),
+      source: 'signal' as const,
+      signalType: 'public-bucket' as const,
+      severity: 'warning' as const,
+      createdAt: toTimestamp(bucket.updated_at ?? bucket.created_at),
+      tab: 'security' as const,
+      title: 'Public storage bucket',
+      description:
+        'This bucket is publicly readable. Anyone can list and access all objects stored in it.',
+      actions: [
+        {
+          label: 'Open bucket',
+          href: `/project/${projectRef}/storage/files/buckets/${encodeURIComponent(bucket.id)}`,
+        },
+      ],
+      sourceData: {
+        type: 'public-bucket' as const,
+        bucketId: bucket.id,
+        bucketName: bucket.name,
+      },
+    }))
+
+  return [...bannedIpSignals, ...publicBucketSignals]
+}
+
+export const sortAdvisorItems = <T extends AdvisorItem>(items: T[]) => {
+  return [...items].sort((a, b) => {
+    const severityDiff = severityOrder[a.severity] - severityOrder[b.severity]
+    if (severityDiff !== 0) return severityDiff
+
+    const createdDiff = (b.createdAt ?? 0) - (a.createdAt ?? 0)
+    if (createdDiff !== 0) return createdDiff
+
+    return getAdvisorItemDisplayTitle(a).localeCompare(getAdvisorItemDisplayTitle(b))
+  })
+}
 
 export const formatItemDate = (timestamp: number): string => {
   const daysFromNow = dayjs().diff(dayjs(timestamp), 'day')
@@ -15,15 +192,28 @@ export const formatItemDate = (timestamp: number): string => {
 
 export const getAdvisorItemDisplayTitle = (item: AdvisorItem): string => {
   if (item.source === 'lint') {
-    const lint = item.original as Lint
     return (
-      lintInfoMap.find((info) => info.name === lint.name)?.title || item.title.replace(/[`\\]/g, '')
+      lintInfoMap.find((info) => info.name === item.original.name)?.title ||
+      item.title.replace(/[`\\]/g, '')
     )
   }
+
+  if (item.source === 'signal') {
+    return `${item.title}: ${getSignalResourceLabel(item)}`
+  }
+
   return item.title.replace(/[`\\]/g, '')
 }
 
-export const tabIconMap: Record<Exclude<AdvisorTab, 'all'>, React.ElementType> = {
+export const getAdvisorItemSecondaryText = (item: AdvisorItem): string | undefined => {
+  if (item.source === 'lint') {
+    return getLintEntityString(item.original)
+  }
+
+  return undefined
+}
+
+export const tabIconMap: Record<Exclude<AdvisorTab, 'all'>, ElementType> = {
   security: Shield,
   performance: Gauge,
   messages: Inbox,

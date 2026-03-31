@@ -5,18 +5,18 @@ import {
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import { useMemo } from 'react'
-
 import { components } from 'api-types'
 import { get, handleError } from 'data/fetchers'
 import { MAX_RETRY_FAILURE_COUNT } from 'data/query-client'
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { PROJECT_STATUS } from 'lib/constants'
+import { useMemo } from 'react'
 import {
   ResponseError,
   type UseCustomInfiniteQueryOptions,
   type UseCustomQueryOptions,
 } from 'types'
+
 import { getBucketNumberEstimate, getBucketNumberEstimateKey } from './buckets-max-size-limit-query'
 import { storageKeys } from './keys'
 
@@ -116,6 +116,22 @@ type BucketData = Awaited<ReturnType<typeof getBucket>>
 export type BucketsData = Awaited<ReturnType<typeof getBuckets>>
 export type BucketsWithPaginationData = Awaited<ReturnType<typeof getBucketsPaginated>>
 export type BucketsError = ResponseError
+
+export const useBucketsQuery = <TData = BucketsData>(
+  { projectRef }: BucketsVariables,
+  { enabled = true, ...options }: UseCustomQueryOptions<BucketsData, BucketsError, TData> = {}
+) => {
+  const { data: project } = useSelectedProjectQuery()
+  const isActive = project?.status === PROJECT_STATUS.ACTIVE_HEALTHY
+
+  return useQuery<BucketsData, BucketsError, TData>({
+    queryKey: storageKeys.buckets(projectRef),
+    queryFn: ({ signal }) => getBuckets({ projectRef }, signal),
+    enabled: enabled && typeof projectRef !== 'undefined' && isActive,
+    ...options,
+    retry: shouldRetryBucketsQuery,
+  })
+}
 
 export const useBucketQuery = <TData = BucketData>(
   { projectRef, bucketId }: GetBucketParams,
