@@ -303,7 +303,7 @@ export const SubscriptionPlanUpdateDialog = ({
                       </div>
                     )}
 
-                    {subscription?.plan?.id !== 'free' && (
+                    {subscription?.plan?.id !== 'free' && proratedCredit > 0 && (
                       <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
                         <div className="py-2 pl-0 flex items-center gap-1">
                           <span>Unused Time on {subscription?.plan?.name} Plan</span>
