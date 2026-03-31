@@ -175,6 +175,7 @@ describe('Advisor signals integration', () => {
     advisorState.reset()
     sidebarManagerState.unregisterSidebar(SIDEBAR_KEYS.ADVISOR_PANEL)
     sidebarManagerState.clearActiveSidebar()
+    vi.unstubAllEnvs()
     vi.clearAllMocks()
   })
 
@@ -195,10 +196,32 @@ describe('Advisor signals integration', () => {
 
     expect(screen.getByText('Why this appears')).toBeInTheDocument()
     expect(
-      screen.getAllByText(
-        'This bucket is publicly readable. Anyone can list and access all objects stored in it.'
-      ).length
+      screen.getAllByText(/This bucket is publicly readable, so anyone can list and access objects/)
+        .length
     ).toBeGreaterThan(0)
+    expect(
+      screen.getByRole('link', { name: 'Learn more' })
+    ).toHaveAttribute(
+      'href',
+      'https://supabase.com/docs/guides/storage/buckets/fundamentals#public-buckets'
+    )
+
+    await userEvent.click(screen.getByText('Banned IP address: 203.0.113.10'))
+
+    expect(
+      screen.getAllByText(/This IP address is temporarily blocked because of suspicious traffic/)
+        .length
+    ).toBeGreaterThan(0)
+    expect(
+      screen.getByRole('link', { name: 'Learn more' })
+    ).toHaveAttribute(
+      'href',
+      'https://supabase.com/docs/reference/cli/supabase-network-bans'
+    )
+
+    await userEvent.click(screen.getByText('Public storage bucket: avatars'))
+
+    expect(screen.getAllByText('Public storage bucket: avatars').length).toBeGreaterThan(0)
 
     await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
 
@@ -208,5 +231,35 @@ describe('Advisor signals integration', () => {
 
     expect(screen.getAllByText('Banned IP address: 203.0.113.10').length).toBeGreaterThan(0)
     expect(screen.getAllByText('Critical lint detail').length).toBeGreaterThan(0)
+  })
+
+  it('renders debug banned IP signals from the env var when the API returns none', () => {
+    vi.stubEnv('NEXT_PUBLIC_ADVISOR_DEBUG_BANNED_IPS', '203.0.113.77')
+    mockUseBannedIPsQuery.mockImplementation((_variables, options) => {
+      if (options?.enabled === false) {
+        return {
+          data: undefined,
+          isPending: false,
+          isError: false,
+        }
+      }
+
+      return {
+        data: {
+          banned_ipv4_addresses: [],
+        },
+        isPending: false,
+        isError: false,
+      }
+    })
+
+    render(
+      <>
+        <AdvisorSection />
+        <AdvisorPanel />
+      </>
+    )
+
+    expect(screen.getAllByText('Banned IP address: 203.0.113.77').length).toBeGreaterThan(0)
   })
 })

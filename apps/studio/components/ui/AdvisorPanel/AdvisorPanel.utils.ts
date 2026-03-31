@@ -146,7 +146,8 @@ export const createAdvisorSignalItems = ({
     tab: 'security' as const,
     title: 'Banned IP address',
     description:
-      'This IP address is temporarily blocked because of suspicious traffic or repeated failed password attempts.',
+      'This IP address is temporarily blocked because of suspicious traffic or repeated failed password attempts. If this block is expected, you can dismiss this signal or remove the ban.',
+    learnMoreHref: 'https://supabase.com/docs/reference/cli/supabase-network-bans',
     actions: [
       {
         label: 'Open network bans',
@@ -168,7 +169,9 @@ export const createAdvisorSignalItems = ({
       tab: 'security' as const,
       title: 'Public storage bucket',
       description:
-        'This bucket is publicly readable. Anyone can list and access all objects stored in it.',
+        'This bucket is publicly readable, so anyone can list and access objects stored in it. Public buckets are often intentional, and you can dismiss this signal if that is expected.',
+      learnMoreHref:
+        'https://supabase.com/docs/guides/storage/buckets/fundamentals#public-buckets',
       actions: [
         {
           label: 'Open bucket',
