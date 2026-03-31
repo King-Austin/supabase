@@ -1,5 +1,5 @@
-import { ExternalLink, EyeOff } from 'lucide-react'
 import { InlineLink } from 'components/ui/InlineLink'
+import { ExternalLink, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from 'ui'
 
@@ -24,10 +24,12 @@ export const AdvisorSignalDetail = ({ item, onDismiss }: AdvisorSignalDetailProp
       </p>
 
       <h3 className="text-sm mb-2">Why this appears</h3>
-      <p className="text-sm leading-6 text-foreground-light mb-6">
+      <p className="text-sm text-foreground-light mb-6">
         {detailDescription}{' '}
         {item.learnMoreHref !== undefined && (
-          <InlineLink href={item.learnMoreHref}>Learn more</InlineLink>
+          <>
+            <InlineLink href={item.learnMoreHref}>Learn more</InlineLink>.
+          </>
         )}
       </p>
 
