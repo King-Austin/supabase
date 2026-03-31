@@ -5,12 +5,14 @@ import type { Bucket } from 'data/storage/buckets-query'
 import { describe, expect, it } from 'vitest'
 
 import {
+  ADVISOR_DEBUG_BANNED_IPS_ENV_VAR,
   createAdvisorLintItems,
   createAdvisorNotificationItems,
   createAdvisorSignalDismissalStorageKey,
   createAdvisorSignalItems,
   createBannedIPSignalFingerprint,
   createPublicBucketSignalFingerprint,
+  getAdvisorDebugBannedIPs,
   sortAdvisorItems,
 } from './AdvisorPanel.utils'
 
@@ -79,6 +81,28 @@ describe('AdvisorPanel.utils', () => {
       bannedIPsData: {
         banned_ipv4_addresses: ['203.0.113.10', '203.0.113.11'],
       } as IPData,
+    })
+
+    expect(result.map((item) => item.fingerprint)).toEqual([
+      'signal:banned-ip:203.0.113.10:v1',
+      'signal:banned-ip:203.0.113.11:v1',
+    ])
+  })
+
+  it('parses debug banned IPs from the opt-in env var format', () => {
+    expect(
+      getAdvisorDebugBannedIPs('203.0.113.10, 203.0.113.11,203.0.113.10, , 203.0.113.12')
+    ).toEqual(['203.0.113.10', '203.0.113.11', '203.0.113.12'])
+    expect(ADVISOR_DEBUG_BANNED_IPS_ENV_VAR).toBe('NEXT_PUBLIC_ADVISOR_DEBUG_BANNED_IPS')
+  })
+
+  it('merges fetched and debug banned IPs without duplicating signals', () => {
+    const result = createAdvisorSignalItems({
+      projectRef: 'project-ref',
+      bannedIPsData: {
+        banned_ipv4_addresses: ['203.0.113.10'],
+      } as IPData,
+      debugBannedIPs: ['203.0.113.10', '203.0.113.11'],
     })
 
     expect(result.map((item) => item.fingerprint)).toEqual([

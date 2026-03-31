@@ -50,10 +50,18 @@ export const notificationPriorityToSeverity = (
 export const createAdvisorSignalDismissalStorageKey = (projectRef: string) =>
   `advisor-signal-dismissals:${projectRef}`
 
+export const ADVISOR_DEBUG_BANNED_IPS_ENV_VAR = 'NEXT_PUBLIC_ADVISOR_DEBUG_BANNED_IPS'
+
 export const createBannedIPSignalFingerprint = (ip: string) => `signal:banned-ip:${ip}:v1`
 
 export const createPublicBucketSignalFingerprint = (bucketId: string) =>
   `signal:public-bucket:${bucketId}:v1`
+
+export const getAdvisorDebugBannedIPs = (rawValue?: string): string[] => {
+  if (!rawValue) return []
+
+  return [...new Set(rawValue.split(',').map((ip) => ip.trim()).filter(Boolean))]
+}
 
 const getSignalResourceLabel = (item: AdvisorSignalItem) =>
   item.sourceData.type === 'banned-ip' ? item.sourceData.ip : item.sourceData.bucketId
@@ -115,15 +123,21 @@ export const createAdvisorNotificationItems = (
 export const createAdvisorSignalItems = ({
   projectRef,
   bannedIPsData,
+  debugBannedIPs,
   buckets,
 }: {
   projectRef?: string
   bannedIPsData?: IPData
+  debugBannedIPs?: string[]
   buckets?: Bucket[]
 }): AdvisorSignalItem[] => {
   if (!projectRef) return []
 
-  const bannedIpSignals = (bannedIPsData?.banned_ipv4_addresses ?? []).map((ip) => ({
+  const bannedIPs = [
+    ...new Set([...(bannedIPsData?.banned_ipv4_addresses ?? []), ...(debugBannedIPs ?? [])]),
+  ]
+
+  const bannedIpSignals = bannedIPs.map((ip) => ({
     id: createBannedIPSignalFingerprint(ip),
     fingerprint: createBannedIPSignalFingerprint(ip),
     source: 'signal' as const,
