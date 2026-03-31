@@ -362,7 +362,7 @@ export const SubscriptionPlanUpdateDialog = ({
                     )}
 
                     <div className="flex items-center justify-between gap-2 border-b border-muted text-foreground">
-                      <div className="py-2 pl-0">Charged today</div>
+                      <div className="py-2 pl-0">Charge today</div>
                       <div className="py-2 pr-0 text-right" translate="no">
                         {formatCurrency(totalCharge)}
                         {subscription?.plan?.id !== 'free' && (
