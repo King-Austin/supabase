@@ -7,7 +7,7 @@ import { GenericSkeletonLoader } from 'ui-patterns'
 import type { AdvisorItem } from './AdvisorPanel.types'
 import {
   formatItemDate,
-  getAdvisorItemDisplayTitle,
+  getAdvisorPanelItemDisplayTitle,
   getAdvisorItemSecondaryText,
   severityBadgeVariants,
   severityColorClasses,
@@ -98,7 +98,7 @@ export const AdvisorPanelBody = ({
           const notification = isNotification ? (item.original as Notification) : null
           const isUnread = notification?.status === 'new'
 
-          const primaryText = getAdvisorItemDisplayTitle(item)
+          const primaryText = getAdvisorPanelItemDisplayTitle(item)
           const secondaryText = getAdvisorItemSecondaryText(item)
           const metadataText = secondaryText ?? (item.createdAt ? formatItemDate(item.createdAt) : undefined)
 

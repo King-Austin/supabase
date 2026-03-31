@@ -5,8 +5,8 @@ import { Badge } from 'ui'
 import type { AdvisorItem } from './AdvisorPanel.types'
 import {
   formatItemDate,
-  getAdvisorItemDisplayTitle,
   getAdvisorItemSecondaryText,
+  getAdvisorPanelItemDisplayTitle,
   severityBadgeVariants,
   severityLabels,
 } from './AdvisorPanel.utils'
@@ -18,7 +18,7 @@ interface AdvisorPanelHeaderProps {
 }
 
 export const AdvisorPanelHeader = ({ selectedItem, onBack, onClose }: AdvisorPanelHeaderProps) => {
-  const displayTitle = selectedItem ? getAdvisorItemDisplayTitle(selectedItem) : undefined
+  const displayTitle = selectedItem ? getAdvisorPanelItemDisplayTitle(selectedItem) : undefined
   const metadataText = selectedItem
     ? (getAdvisorItemSecondaryText(selectedItem) ??
       (selectedItem.createdAt ? formatItemDate(selectedItem.createdAt) : undefined))

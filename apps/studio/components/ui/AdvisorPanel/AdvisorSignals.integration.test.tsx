@@ -193,7 +193,7 @@ describe('Advisor signals integration', () => {
     expect(screen.getAllByText('Critical lint detail').length).toBeGreaterThan(0)
     expect(
       screen.getByText(
-        'This bucket is publicly readable, so anyone can list and access objects stored in it.'
+        'A bucket is publicly readable, so anyone can list and access objects stored in it.'
       )
     ).toBeInTheDocument()
     expect(

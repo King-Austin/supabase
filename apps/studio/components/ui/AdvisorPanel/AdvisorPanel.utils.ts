@@ -146,7 +146,7 @@ export const createAdvisorSignalItems = ({
     tab: 'security' as const,
     title: 'Banned IP address',
     description:
-      'This IP address is temporarily blocked because of suspicious traffic or repeated failed password attempts.',
+      'An IP address is temporarily blocked because of suspicious traffic or repeated failed password attempts.',
     detailDescription:
       'This IP address is temporarily blocked because of suspicious traffic or repeated failed password attempts. If this block is expected, you can dismiss this signal or remove the ban.',
     learnMoreHref: 'https://supabase.com/docs/reference/cli/supabase-network-bans',
@@ -171,7 +171,7 @@ export const createAdvisorSignalItems = ({
       tab: 'security' as const,
       title: 'Public storage bucket',
       description:
-        'This bucket is publicly readable, so anyone can list and access objects stored in it.',
+        'A bucket is publicly readable, so anyone can list and access objects stored in it.',
       detailDescription:
         'This bucket is publicly readable, so anyone can list and access objects stored in it. Public buckets are often intentional, and you can dismiss this signal if that is expected.',
       learnMoreHref:
@@ -224,6 +224,14 @@ export const getAdvisorItemDisplayTitle = (item: AdvisorItem): string => {
   }
 
   return item.title.replace(/[`\\]/g, '')
+}
+
+export const getAdvisorPanelItemDisplayTitle = (item: AdvisorItem): string => {
+  if (item.source === 'signal') {
+    return item.title
+  }
+
+  return getAdvisorItemDisplayTitle(item)
 }
 
 export const getAdvisorItemSecondaryText = (item: AdvisorItem): string | undefined => {
