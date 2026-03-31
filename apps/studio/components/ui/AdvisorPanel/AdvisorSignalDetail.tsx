@@ -1,11 +1,12 @@
 import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
 import { AiAssistantDropdown } from 'components/ui/AiAssistantDropdown'
 import { InlineLink } from 'components/ui/InlineLink'
-import { Box, ExternalLink, EyeOff, Globe } from 'lucide-react'
+import { FilesBucket as FilesBucketIcon } from 'icons'
+import { EyeOff, Globe } from 'lucide-react'
 import Link from 'next/link'
 import { useAiAssistantStateSnapshot } from 'state/ai-assistant-state'
 import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
-import { Button } from 'ui'
+import { Button, Tooltip, TooltipContent, TooltipTrigger } from 'ui'
 
 import type { AdvisorSignalItem } from './AdvisorPanel.types'
 
@@ -38,13 +39,30 @@ export const AdvisorSignalDetail = ({ item, onDismiss }: AdvisorSignalDetailProp
 
   const entityIcon =
     item.sourceData.type === 'banned-ip' ? (
-      <Globe size={15} strokeWidth={1.5} className="text-foreground-muted" />
+      <Globe size={15} className="text-foreground-muted" />
     ) : (
-      <Box size={15} strokeWidth={1.5} className="text-foreground-muted" />
+      <FilesBucketIcon size={15} className="text-foreground-muted" />
     )
   const entityValue =
     item.sourceData.type === 'banned-ip' ? item.sourceData.ip : item.sourceData.bucketId
-  const detailDescription = item.detailDescription ?? item.description
+  const entityTooltip =
+    item.sourceData.type === 'banned-ip'
+      ? 'IP address currently blocked by network bans'
+      : 'File storage bucket'
+  const issueDescription =
+    item.sourceData.type === 'banned-ip' ? (
+      <>
+        The IP address <code className="text-code-inline">{item.sourceData.ip}</code> is
+        temporarily blocked because of suspicious traffic or repeated failed password attempts. If
+        this block is expected, you can dismiss this signal or remove the ban.
+      </>
+    ) : (
+      <>
+        The bucket <code className="text-code-inline">{item.sourceData.bucketId}</code> is
+        publicly readable, so anyone can list and access objects stored in it. Public buckets are
+        often intentional, and you can dismiss this signal if that is expected.
+      </>
+    )
 
   const handleAskAssistant = () => {
     openSidebar(SIDEBAR_KEYS.AI_ASSISTANT)
@@ -57,14 +75,21 @@ export const AdvisorSignalDetail = ({ item, onDismiss }: AdvisorSignalDetailProp
   return (
     <div>
       <h3 className="text-sm mb-2">Entity</h3>
-      <div className="flex items-center gap-1 px-2 py-0.5 bg-surface-200 border rounded-lg text-sm mb-6 w-fit">
-        {entityIcon}
-        <span>{entityValue}</span>
-      </div>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="flex items-center gap-2 px-2 py-0.5 bg-surface-200 border rounded-lg text-sm mb-6 w-fit">
+            <span className="flex items-center text-foreground-muted" aria-hidden="true">
+              {entityIcon}
+            </span>
+            <span>{entityValue}</span>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">{entityTooltip}</TooltipContent>
+      </Tooltip>
 
       <h3 className="text-sm mb-2">Issue</h3>
       <p className="text-sm text-foreground-light mb-6">
-        {detailDescription}{' '}
+        {issueDescription}{' '}
         {item.learnMoreHref !== undefined && (
           <>
             <InlineLink href={item.learnMoreHref}>Learn more</InlineLink>.
@@ -82,10 +107,7 @@ export const AdvisorSignalDetail = ({ item, onDismiss }: AdvisorSignalDetailProp
         {item.actions.map((action) => (
           <Button key={`${item.fingerprint}-${action.href}`} type="default" asChild>
             <Link href={action.href}>
-              <span className="flex items-center gap-2">
-                <ExternalLink size={14} strokeWidth={1.5} />
-                {action.label}
-              </span>
+              <span className="flex items-center gap-2">{action.label}</span>
             </Link>
           </Button>
         ))}

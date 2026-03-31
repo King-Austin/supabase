@@ -208,10 +208,15 @@ describe('Advisor signals integration', () => {
     expect(screen.getByText('Issue')).toBeInTheDocument()
     expect(screen.getByText('Resolve')).toBeInTheDocument()
     expect(screen.getAllByTestId('advisor-assistant-dropdown').length).toBeGreaterThan(0)
-    expect(screen.getByText('avatars')).toBeInTheDocument()
+    expect(screen.getAllByText('avatars').length).toBeGreaterThan(0)
     expect(
-      screen.getAllByText(/This bucket is publicly readable, so anyone can list and access objects/)
-        .length
+      screen.getAllByText((_, node) =>
+        Boolean(
+          node?.textContent?.includes(
+            'The bucket avatars is publicly readable, so anyone can list and access objects stored in it.'
+          )
+        )
+      ).length
     ).toBeGreaterThan(0)
     expect(
       screen.getByRole('link', { name: 'Learn more' })
@@ -223,8 +228,13 @@ describe('Advisor signals integration', () => {
     await userEvent.click(screen.getByText('Banned IP address: 203.0.113.10'))
 
     expect(
-      screen.getAllByText(/This IP address is temporarily blocked because of suspicious traffic/)
-        .length
+      screen.getAllByText((_, node) =>
+        Boolean(
+          node?.textContent?.includes(
+            'The IP address 203.0.113.10 is temporarily blocked because of suspicious traffic or repeated failed password attempts.'
+          )
+        )
+      ).length
     ).toBeGreaterThan(0)
     expect(
       screen.getByRole('link', { name: 'Learn more' })
