@@ -155,42 +155,44 @@ export const AdvisorSection = ({ showEmptyState = false }: { showEmptyState?: bo
                       )}
                       <CardTitle className="text-foreground-light">{categoryLabel}</CardTitle>
                     </div>
-                    {isLint && (
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          e.preventDefault()
-                        }}
-                      >
-                        <AiAssistantDropdown
-                          label="Ask Assistant"
-                          iconOnly
-                          tooltip="Help me fix this issue"
-                          buildPrompt={() => createLintSummaryPrompt(item.original)}
-                          onOpenAssistant={() => {
-                            openSidebar(SIDEBAR_KEYS.AI_ASSISTANT)
-                            snap.newChat({
-                              name: 'Summarise lint',
-                              initialInput: createLintSummaryPrompt(item.original),
-                            })
-                            track('advisor_assistant_button_clicked', {
-                              origin: 'homepage',
-                              advisorCategory: item.original.categories[0],
-                              advisorType: item.original.name,
-                              advisorLevel: item.original.level,
-                            })
+                    <div className="flex items-center gap-2">
+                      <Badge variant={severityBadgeVariants[item.severity]} className="w-fit">
+                        {item.severity.toUpperCase()}
+                      </Badge>
+                      {isLint && (
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            e.preventDefault()
                           }}
-                          telemetrySource="advisor_section"
-                          type="text"
-                          className="w-7 h-7"
-                        />
-                      </div>
-                    )}
+                        >
+                          <AiAssistantDropdown
+                            label="Ask Assistant"
+                            iconOnly
+                            tooltip="Help me fix this issue"
+                            buildPrompt={() => createLintSummaryPrompt(item.original)}
+                            onOpenAssistant={() => {
+                              openSidebar(SIDEBAR_KEYS.AI_ASSISTANT)
+                              snap.newChat({
+                                name: 'Summarise lint',
+                                initialInput: createLintSummaryPrompt(item.original),
+                              })
+                              track('advisor_assistant_button_clicked', {
+                                origin: 'homepage',
+                                advisorCategory: item.original.categories[0],
+                                advisorType: item.original.name,
+                                advisorLevel: item.original.level,
+                              })
+                            }}
+                            telemetrySource="advisor_section"
+                            type="text"
+                            className="w-7 h-7"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </CardHeader>
                   <CardContent className="p-6 pt-16 flex flex-col justify-end flex-1 overflow-auto">
-                    <Badge variant={severityBadgeVariants[item.severity]} className="mb-3 w-fit">
-                      {item.severity.toUpperCase()}
-                    </Badge>
                     <h3 className="mb-1">{getAdvisorItemDisplayTitle(item)}</h3>
                     <Markdown className="leading-6 text-sm text-foreground-light">
                       {description && description.replace(/\\`/g, '`')}
