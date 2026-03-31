@@ -99,8 +99,8 @@ export const AdvisorPanelBody = ({
           const isUnread = notification?.status === 'new'
 
           const primaryText = getAdvisorItemDisplayTitle(item)
-          const hasDate = !!item.createdAt
           const secondaryText = getAdvisorItemSecondaryText(item)
+          const metadataText = secondaryText ?? (item.createdAt ? formatItemDate(item.createdAt) : undefined)
 
           return (
             <div key={`${item.source}-${item.id}`} className="border-b">
@@ -121,16 +121,10 @@ export const AdvisorPanelBody = ({
                     />
                     <div className="text-left flex flex-col gap-0.5 truncate flex-1 min-w-0">
                       <div className="truncate">{primaryText}</div>
-                      {hasDate ? (
-                        <span className="text-xs text-foreground-light capitalize-sentence">
-                          {formatItemDate(item.createdAt!)}
-                        </span>
-                      ) : (
-                        secondaryText && (
-                          <div className="flex items-center gap-1 text-xs text-foreground-light">
-                            <span className="truncate">{secondaryText}</span>
-                          </div>
-                        )
+                      {metadataText && (
+                        <div className="flex items-center gap-1 text-xs text-foreground-light">
+                          <span className="truncate">{metadataText}</span>
+                        </div>
                       )}
                     </div>
                   </div>

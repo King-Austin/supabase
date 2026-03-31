@@ -6,6 +6,7 @@ import type { AdvisorItem } from './AdvisorPanel.types'
 import {
   formatItemDate,
   getAdvisorItemDisplayTitle,
+  getAdvisorItemSecondaryText,
   severityBadgeVariants,
   severityLabels,
 } from './AdvisorPanel.utils'
@@ -18,6 +19,10 @@ interface AdvisorPanelHeaderProps {
 
 export const AdvisorPanelHeader = ({ selectedItem, onBack, onClose }: AdvisorPanelHeaderProps) => {
   const displayTitle = selectedItem ? getAdvisorItemDisplayTitle(selectedItem) : undefined
+  const metadataText = selectedItem
+    ? getAdvisorItemSecondaryText(selectedItem) ??
+      (selectedItem.createdAt ? formatItemDate(selectedItem.createdAt) : undefined)
+    : undefined
 
   return (
     <div className="border-b px-4 py-3 flex items-center gap-3">
@@ -31,10 +36,8 @@ export const AdvisorPanelHeader = ({ selectedItem, onBack, onClose }: AdvisorPan
       <div className="flex items-center gap-2 overflow-hidden flex-1">
         <div className="flex-1 flex flex-col gap-0.5">
           <span className="heading-default">{displayTitle}</span>
-          {selectedItem?.createdAt && (
-            <span className="text-xs text-foreground-light capitalize-sentence">
-              {formatItemDate(selectedItem.createdAt)}
-            </span>
+          {metadataText && (
+            <span className="text-xs text-foreground-light capitalize-sentence">{metadataText}</span>
           )}
         </div>
         {selectedItem && (

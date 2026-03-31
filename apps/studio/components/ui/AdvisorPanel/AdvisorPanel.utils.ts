@@ -231,6 +231,10 @@ export const getAdvisorItemSecondaryText = (item: AdvisorItem): string | undefin
     return getLintEntityString(item.original)
   }
 
+  if (item.source === 'signal') {
+    return item.sourceData.type === 'public-bucket' ? 'Storage' : 'Database'
+  }
+
   return undefined
 }
 

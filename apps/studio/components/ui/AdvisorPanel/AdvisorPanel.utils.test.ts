@@ -13,6 +13,7 @@ import {
   createBannedIPSignalFingerprint,
   createPublicBucketSignalFingerprint,
   getAdvisorDebugBannedIPs,
+  getAdvisorItemSecondaryText,
   sortAdvisorItems,
 } from './AdvisorPanel.utils'
 
@@ -124,6 +125,22 @@ describe('AdvisorPanel.utils', () => {
       fingerprint: 'signal:public-bucket:avatars:v1',
       title: 'Public storage bucket',
     })
+  })
+
+  it('uses surface-area metadata for signal items', () => {
+    const [publicBucketSignal] = createAdvisorSignalItems({
+      projectRef: 'project-ref',
+      buckets: [createBucket()],
+    })
+    const [bannedIpSignal] = createAdvisorSignalItems({
+      projectRef: 'project-ref',
+      bannedIPsData: {
+        banned_ipv4_addresses: ['203.0.113.10'],
+      } as IPData,
+    })
+
+    expect(getAdvisorItemSecondaryText(publicBucketSignal)).toBe('Storage')
+    expect(getAdvisorItemSecondaryText(bannedIpSignal)).toBe('Database')
   })
 
   it('creates multiple signals when multiple public buckets exist', () => {
