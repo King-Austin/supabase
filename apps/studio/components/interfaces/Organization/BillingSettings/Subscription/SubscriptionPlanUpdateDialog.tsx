@@ -216,7 +216,7 @@ export const SubscriptionPlanUpdateDialog = ({
   // Calculate new plan cost
   const newPlanCost = Number(subscriptionPlanMeta?.priceMonthly) ?? 0
 
-  const customerBalance = Number(subscriptionPreview?.upfront_charge?.customer_balance) ?? 0
+  const customerBalance = subscriptionPreview?.upfront_charge?.customer_balance ?? 0
 
   const taxAmount = subscriptionPreview?.upfront_charge?.tax?.tax_amount ?? 0
 
