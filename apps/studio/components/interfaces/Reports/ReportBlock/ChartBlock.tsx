@@ -25,6 +25,24 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, WarningIcon } from '
 import { METRIC_THRESHOLDS } from './ReportBlock.constants'
 import { ReportBlockContainer } from './ReportBlockContainer'
 
+function formatYAxisTick(value: number): string {
+  if (Math.abs(value) >= 1_000_000) {
+    const n = value / 1_000_000
+    return `${Number.isInteger(n) ? n : n.toFixed(1)}M`
+  }
+  if (Math.abs(value) >= 1_000) {
+    const n = value / 1_000
+    return `${Number.isInteger(n) ? n : n.toFixed(1)}K`
+  }
+  if (value !== 0 && Math.abs(value) < 1) {
+    return parseFloat(value.toFixed(2)).toString()
+  }
+  if (!Number.isInteger(value)) {
+    return parseFloat(value.toFixed(1)).toString()
+  }
+  return String(value)
+}
+
 interface ChartBlockProps {
   label: string
   attribute: string
@@ -175,11 +193,8 @@ export const ChartBlock = ({
 
   const maxDataValue =
     data.length > 0 ? Math.max(...data.map((d: any) => Number(d[metricLabel]) || 0)) : 0
-  const yAxisWidth = effectiveLogScale
-    ? 52
-    : isPercentage
-      ? 36
-      : Math.max(36, (String(Math.round(maxDataValue)).length + 1) * 7)
+  const maxFormattedLength = isPercentage ? 3 : formatYAxisTick(maxDataValue).length
+  const yAxisWidth = effectiveLogScale ? 52 : Math.max(36, (maxFormattedLength + 1) * 8)
 
   const getInitialHighlightedValue = useCallback(() => {
     if (!chartData?.data?.length) return undefined
@@ -307,7 +322,7 @@ export const ChartBlock = ({
                   domain={effectiveLogScale ? [1, 'auto'] : isPercentage ? [0, 100] : undefined}
                   allowDataOverflow={effectiveLogScale}
                   width={yAxisWidth}
-                  tickFormatter={effectiveLogScale ? formatLogTick : undefined}
+                  tickFormatter={effectiveLogScale ? formatLogTick : formatYAxisTick}
                 />
                 <ChartTooltip
                   content={
@@ -334,7 +349,7 @@ export const ChartBlock = ({
                   domain={effectiveLogScale ? [1, 'auto'] : isPercentage ? [0, 100] : undefined}
                   allowDataOverflow={effectiveLogScale}
                   width={yAxisWidth}
-                  tickFormatter={effectiveLogScale ? formatLogTick : undefined}
+                  tickFormatter={effectiveLogScale ? formatLogTick : formatYAxisTick}
                 />
                 <ChartTooltip
                   content={
