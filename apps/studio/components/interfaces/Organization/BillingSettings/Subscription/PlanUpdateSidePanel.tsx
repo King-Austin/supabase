@@ -61,6 +61,19 @@ export const PlanUpdateSidePanel = () => {
   const [showUpgradeSurvey, setShowUpgradeSurvey] = useState(false)
   const [showDowngradeError, setShowDowngradeError] = useState(false)
   const [selectedTier, setSelectedTier] = useState<'tier_free' | 'tier_pro' | 'tier_team'>()
+  const [billingAddress, setBillingAddress] = useState<{
+    country: string
+    line1: string
+    line2?: string
+    city: string
+    state: string
+    postal_code: string
+  }>()
+  const [billingTaxId, setBillingTaxId] = useState<{
+    country: string
+    type: string
+    value: string
+  } | null>()
 
   const { can: canUpdateSubscription } = useAsyncCheckPermissions(
     PermissionAction.BILLING_WRITE,
@@ -97,8 +110,14 @@ export const PlanUpdateSidePanel = () => {
     data: subscriptionPreview,
     error: subscriptionPreviewError,
     isPending: subscriptionPreviewIsLoading,
+    isFetching: subscriptionPreviewIsFetching,
     isSuccess: subscriptionPreviewInitialized,
-  } = useOrganizationBillingSubscriptionPreview({ tier: selectedTier, organizationSlug: slug })
+  } = useOrganizationBillingSubscriptionPreview({
+    tier: selectedTier,
+    organizationSlug: slug,
+    address: billingAddress,
+    taxId: billingTaxId ?? undefined,
+  })
 
   const availablePlans: OrgPlan[] = plans?.plans ?? []
   const hasMembersExceedingFreeTierLimit =
@@ -111,6 +130,8 @@ export const PlanUpdateSidePanel = () => {
   useEffect(() => {
     if (visible) {
       setSelectedTier(undefined)
+      setBillingAddress(undefined)
+      setBillingTaxId(undefined)
       const source = Array.isArray(router.query.source)
         ? router.query.source[0]
         : router.query.source
@@ -335,6 +356,7 @@ export const PlanUpdateSidePanel = () => {
         planMeta={planMeta}
         subscriptionPreviewError={subscriptionPreviewError}
         subscriptionPreviewIsLoading={subscriptionPreviewIsLoading}
+        subscriptionPreviewIsFetching={subscriptionPreviewIsFetching}
         subscriptionPreviewInitialized={subscriptionPreviewInitialized}
         subscriptionPreview={subscriptionPreview}
         subscription={subscription}
@@ -345,6 +367,8 @@ export const PlanUpdateSidePanel = () => {
             subscriptionsPlans.find((plan) => plan.id === `tier_${subscription?.plan?.id}`)
               ?.features || [],
         }}
+        onAddressChange={setBillingAddress}
+        onTaxIdChange={setBillingTaxId}
       />
 
       <MembersExceedLimitModal

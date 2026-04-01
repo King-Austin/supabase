@@ -13,7 +13,7 @@ import {
 } from '@stripe/stripe-js'
 import { Form } from '@ui/components/shadcn/ui/form'
 import { Check, ChevronsUpDown } from 'lucide-react'
-import { forwardRef, useEffect, useId, useImperativeHandle, useMemo, useState } from 'react'
+import { forwardRef, useEffect, useId, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import {
@@ -85,12 +85,16 @@ export const NewPaymentMethodElement = forwardRef(
       currentAddress,
       currentTaxId,
       customerName,
+      onAddressChange,
+      onTaxIdChange,
     }: {
       email?: string | null | undefined
       readOnly: boolean
       currentAddress?: CustomerAddress | null
       currentTaxId?: CustomerTaxId | null
       customerName?: string | undefined
+      onAddressChange?: (address: StripeAddressElementChangeEvent['value']) => void
+      onTaxIdChange?: (taxId: CustomerTaxId | null) => void
     },
     ref
   ) => {
@@ -123,13 +127,38 @@ export const NewPaymentMethodElement = forwardRef(
       form.setValue('tax_id_name', name)
     }
 
-    const { tax_id_name } = form.watch()
+    const { tax_id_name, tax_id_value } = form.watch()
     const selectedTaxId = TAX_IDS.find((option) => option.name === tax_id_name)
 
     const [purchasingAsBusiness, setPurchasingAsBusiness] = useState(currentTaxId != null)
     const [stripeAddress, setStripeAddress] = useState<
       StripeAddressElementChangeEvent['value'] | undefined
     >(undefined)
+    const addressChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const taxIdChangeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+    useEffect(() => {
+      return () => {
+        if (addressChangeTimerRef.current) clearTimeout(addressChangeTimerRef.current)
+        if (taxIdChangeTimerRef.current) clearTimeout(taxIdChangeTimerRef.current)
+      }
+    }, [])
+
+    useEffect(() => {
+      if (!onTaxIdChange) return
+      if (taxIdChangeTimerRef.current) clearTimeout(taxIdChangeTimerRef.current)
+      taxIdChangeTimerRef.current = setTimeout(() => {
+        if (purchasingAsBusiness && selectedTaxId && tax_id_value) {
+          onTaxIdChange({
+            country: getEffectiveTaxCountry(selectedTaxId),
+            type: selectedTaxId.type,
+            value: tax_id_value,
+          })
+        } else {
+          onTaxIdChange(null)
+        }
+      }, 1000)
+    }, [purchasingAsBusiness, selectedTaxId, tax_id_value])
 
     const availableTaxIds = useMemo(() => {
       const country = stripeAddress?.address.country || null
@@ -272,7 +301,15 @@ export const NewPaymentMethodElement = forwardRef(
           options={addressOptions}
           // Force reload after changing purchasingAsBusiness setting, it seems like the element does not reload otherwise
           key={`address-elements-${purchasingAsBusiness}`}
-          onChange={(evt) => setStripeAddress(evt.value)}
+          onChange={(evt) => {
+            setStripeAddress(evt.value)
+            if (onAddressChange && evt.complete) {
+              if (addressChangeTimerRef.current) clearTimeout(addressChangeTimerRef.current)
+              addressChangeTimerRef.current = setTimeout(() => {
+                onAddressChange(evt.value)
+              }, 1000)
+            }
+          }}
           onReady={() => setFullyLoaded(true)}
         />
 

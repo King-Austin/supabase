@@ -60,11 +60,21 @@ interface Props {
   planMeta: any
   subscriptionPreviewError: any
   subscriptionPreviewIsLoading: boolean
+  subscriptionPreviewIsFetching: boolean
   subscriptionPreviewInitialized: boolean
   subscriptionPreview: OrganizationBillingSubscriptionPreviewResponse | undefined
   subscription: any
   currentPlanMeta: any
   projects: OrgProject[]
+  onAddressChange?: (address: {
+    country: string
+    line1: string
+    line2?: string
+    city: string
+    state: string
+    postal_code: string
+  }) => void
+  onTaxIdChange?: (taxId: { country: string; type: string; value: string } | null) => void
 }
 
 export const SubscriptionPlanUpdateDialog = ({
@@ -73,11 +83,14 @@ export const SubscriptionPlanUpdateDialog = ({
   planMeta,
   subscriptionPreviewError,
   subscriptionPreviewIsLoading,
+  subscriptionPreviewIsFetching,
   subscriptionPreviewInitialized,
   subscriptionPreview,
   subscription,
   currentPlanMeta,
   projects,
+  onAddressChange,
+  onTaxIdChange,
 }: Props) => {
   const { resolvedTheme } = useTheme()
   const { data: selectedOrganization } = useSelectedOrganizationQuery()
@@ -255,6 +268,8 @@ export const SubscriptionPlanUpdateDialog = ({
                       selectedPaymentMethod={selectedPaymentMethod}
                       onSelectPaymentMethod={(pm) => setSelectedPaymentMethod(pm)}
                       readOnly={paymentConfirmationLoading || isConfirming || isUpdating}
+                      onAddressChange={onAddressChange}
+                      onTaxIdChange={onTaxIdChange}
                     />
                   </div>
                 )}
@@ -282,14 +297,14 @@ export const SubscriptionPlanUpdateDialog = ({
                 )}
               </div>
 
-              {subscriptionPreviewIsLoading && (
+              {subscriptionPreviewIsFetching && (
                 <div className="space-y-2 mb-4 mt-2">
                   <ShimmeringLoader />
                   <ShimmeringLoader className="w-3/4" />
                   <ShimmeringLoader className="w-1/2" />
                 </div>
               )}
-              {subscriptionPreviewInitialized && (
+              {subscriptionPreviewInitialized && !subscriptionPreviewIsFetching && (
                 <>
                   <div className="mt-2 mb-4 text-foreground-light text-sm">
                     {hasBreakdownItems && changeType !== 'downgrade' && (

@@ -37,6 +37,15 @@ export interface PaymentMethodSelectionProps {
   onSelectPaymentMethod: (id: string) => void
   layout?: 'vertical' | 'horizontal'
   readOnly: boolean
+  onAddressChange?: (address: {
+    country: string
+    line1: string
+    line2?: string
+    city: string
+    state: string
+    postal_code: string
+  }) => void
+  onTaxIdChange?: (taxId: { country: string; type: string; value: string } | null) => void
 }
 
 const PaymentMethodSelection = forwardRef(function PaymentMethodSelection(
@@ -45,6 +54,8 @@ const PaymentMethodSelection = forwardRef(function PaymentMethodSelection(
     onSelectPaymentMethod,
     layout = 'vertical',
     readOnly,
+    onAddressChange,
+    onTaxIdChange,
   }: PaymentMethodSelectionProps,
   ref
 ) {
@@ -281,6 +292,16 @@ const PaymentMethodSelection = forwardRef(function PaymentMethodSelection(
                 customerName={customerProfile?.billing_name}
                 currentAddress={customerProfile?.address}
                 currentTaxId={taxId}
+                onAddressChange={
+                  onAddressChange
+                    ? (value) =>
+                        onAddressChange({
+                          ...value.address,
+                          line2: value.address.line2 || undefined,
+                        })
+                    : undefined
+                }
+                onTaxIdChange={onTaxIdChange}
               />
             </Elements>
 
