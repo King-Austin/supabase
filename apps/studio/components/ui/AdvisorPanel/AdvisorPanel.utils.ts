@@ -1,12 +1,12 @@
-import { lintInfoMap } from 'components/interfaces/Linter/Linter.utils'
-import type { IPData } from 'data/banned-ips/banned-ips-query'
-import type { Lint } from 'data/lint/lint-query'
-import type { Notification, NotificationData } from 'data/notifications/notifications-v2-query'
-import type { Bucket } from 'data/storage/buckets-query'
 import dayjs from 'dayjs'
 import { Gauge, Inbox, Shield } from 'lucide-react'
 import type { ElementType } from 'react'
-import { AdvisorSeverity, AdvisorTab } from 'state/advisor-state'
+import { lintInfoMap } from '@/components/interfaces/Linter/Linter.utils'
+import type { IPData } from '@/data/banned-ips/banned-ips-query'
+import type { Lint } from '@/data/lint/lint-query'
+import type { Notification, NotificationData } from '@/data/notifications/notifications-v2-query'
+import type { Bucket } from '@/data/storage/buckets-query'
+import type { AdvisorSeverity, AdvisorTab } from '@/state/advisor-state'
 
 import type {
   AdvisorItem,
@@ -60,14 +60,7 @@ export const createPublicBucketSignalFingerprint = (bucketId: string) =>
 export const getAdvisorDebugBannedIPs = (rawValue?: string): string[] => {
   if (!rawValue) return []
 
-  return [
-    ...new Set(
-      rawValue
-        .split(',')
-        .map((ip) => ip.trim())
-        .filter(Boolean)
-    ),
-  ]
+  return [...new Set(rawValue.split(',').map((ip) => ip.trim()).filter(Boolean))]
 }
 
 const getSignalResourceLabel = (item: AdvisorSignalItem) =>
@@ -268,15 +261,6 @@ export const severityBadgeVariants: Record<AdvisorSeverity, 'destructive' | 'war
     warning: 'warning',
     info: 'default',
   }
-
-/** TR → BL wash for advisor cards; pairs with default card `bg-surface-100`. */
-export const severityCardGradientClasses: Record<AdvisorSeverity, string> = {
-  critical:
-    'border-destructive-600/30 dark:border-destructive-500/50 bg-gradient-to-bl from-destructive-500/5 via-destructive-500/[0.03] via-[25%] dark:via-[42%] to-transparent to-[60%] dark:to-[88%]',
-  warning:
-    'border-warning-600/30 dark:border-warning-500/50 bg-gradient-to-bl from-warning-500/5 via-warning-500/[0.03] via-[25%] dark:via-[42%] to-transparent to-[60%] dark:to-[88%]',
-  info: '',
-}
 
 export const severityLabels: Record<AdvisorSeverity, string> = {
   critical: 'Critical',

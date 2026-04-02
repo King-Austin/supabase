@@ -1,14 +1,4 @@
-import { SIDEBAR_KEYS } from 'components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
-import { useProjectLintsQuery } from 'data/lint/lint-query'
-import { useNotificationsV2Query } from 'data/notifications/notifications-v2-query'
-import type { Notification } from 'data/notifications/notifications-v2-query'
-import { useNotificationsV2UpdateMutation } from 'data/notifications/notifications-v2-update-mutation'
-import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
-import { IS_PLATFORM } from 'lib/constants'
-import { useTrack } from 'lib/telemetry/track'
 import { useMemo, useRef } from 'react'
-import { AdvisorTab, useAdvisorStateSnapshot } from 'state/advisor-state'
-import { useSidebarManagerSnapshot } from 'state/sidebar-manager-state'
 
 import { AdvisorDetail } from './AdvisorDetail'
 import { AdvisorFilters } from './AdvisorFilters'
@@ -21,6 +11,15 @@ import {
 import { AdvisorPanelBody } from './AdvisorPanelBody'
 import { AdvisorPanelHeader } from './AdvisorPanelHeader'
 import { useAdvisorSignals } from './useAdvisorSignals'
+import { SIDEBAR_KEYS } from '@/components/layouts/ProjectLayout/LayoutSidebar/LayoutSidebarProvider'
+import { useProjectLintsQuery } from '@/data/lint/lint-query'
+import { Notification, useNotificationsV2Query } from '@/data/notifications/notifications-v2-query'
+import { useNotificationsV2UpdateMutation } from '@/data/notifications/notifications-v2-update-mutation'
+import { useSelectedProjectQuery } from '@/hooks/misc/useSelectedProject'
+import { IS_PLATFORM } from '@/lib/constants'
+import { useTrack } from '@/lib/telemetry/track'
+import { AdvisorTab, useAdvisorStateSnapshot } from '@/state/advisor-state'
+import { useSidebarManagerSnapshot } from '@/state/sidebar-manager-state'
 
 export const AdvisorPanel = () => {
   const track = useTrack()

@@ -1,6 +1,6 @@
-import type { Lint } from 'data/lint/lint-query'
-import type { Notification } from 'data/notifications/notifications-v2-query'
-import { AdvisorItemSource, AdvisorSeverity } from 'state/advisor-state'
+import type { Lint } from '@/data/lint/lint-query'
+import type { Notification } from '@/data/notifications/notifications-v2-query'
+import type { AdvisorItemSource, AdvisorSeverity } from '@/state/advisor-state'
 
 export type AdvisorSignalType = 'banned-ip' | 'public-bucket'
 
