@@ -55,6 +55,7 @@ export type OrganizationBillingSubscriptionPreviewResponse = {
       tax_rate_percentage: number
       currency: string
     }
+    tax_status: 'calculated' | 'not_applicable' | 'failed'
   }
 }
 
