@@ -222,7 +222,8 @@ export const SubscriptionPlanUpdateDialog = ({
   const customerBalance = subscriptionPreview?.upfront_charge?.customer_balance ?? 0
 
   const taxStatus = subscriptionPreview?.upfront_charge?.tax_status
-  const hasTax = taxStatus === 'calculated'
+  const hasTax =
+    taxStatus === 'calculated' && (subscriptionPreview?.upfront_charge?.tax?.tax_amount ?? 0) > 0
   const taxFailed = taxStatus === 'failed'
   const tax = subscriptionPreview?.upfront_charge?.tax
   const taxableAmount = subscriptionPreview?.upfront_charge?.taxable_amount
@@ -232,6 +233,15 @@ export const SubscriptionPlanUpdateDialog = ({
   const currentPlanId = subscription?.plan?.id
   const currentPlanName = subscription?.plan?.name
 
+  // Derives the itemized charge breakdown rows shown above "Charge today".
+  // Example: Pro -> Team upgrade with proration, tax, and credits:
+  //   Team Plan            $25.00
+  //   Unused Time on Pro   -$8.33
+  //   Subtotal             $16.67
+  //   Tax (10%)             $1.67
+  //   Credits              -$5.00
+  //   ─────────────────────────────
+  //   Charge today         $13.34
   const breakdownItems = useMemo(() => {
     const items: BreakdownItem[] = []
 
