@@ -54,6 +54,10 @@ const DOWNGRADE_PLAN_HEADINGS = {
 
 type DowngradePlanHeadingKey = keyof typeof DOWNGRADE_PLAN_HEADINGS
 
+type BreakdownItem =
+  | { type: 'amount'; label: string; amount: number; tooltip?: string }
+  | { type: 'notice'; label: string }
+
 interface Props {
   selectedTier: 'tier_free' | 'tier_pro' | 'tier_team' | undefined
   onClose: () => void
@@ -220,11 +224,77 @@ export const SubscriptionPlanUpdateDialog = ({
   const taxStatus = subscriptionPreview?.upfront_charge?.tax_status
   const hasTax = taxStatus === 'calculated'
   const taxFailed = taxStatus === 'failed'
+  const tax = subscriptionPreview?.upfront_charge?.tax
+  const taxableAmount = subscriptionPreview?.upfront_charge?.taxable_amount
 
   const totalCharge = subscriptionPreview?.upfront_charge?.total ?? 0
 
-  // Only show the itemized breakdown when there's more than just the plan cost
-  const hasBreakdownItems = hasTax || subscription?.plan?.id !== 'free' || customerBalance > 0
+  const currentPlanId = subscription?.plan?.id
+  const currentPlanName = subscription?.plan?.name
+
+  const breakdownItems = useMemo(() => {
+    const items: BreakdownItem[] = []
+
+    if (currentPlanId !== 'free' && proratedCredit > 0) {
+      items.push({
+        type: 'amount',
+        label: `Unused Time on ${currentPlanName} Plan`,
+        amount: -proratedCredit,
+        tooltip:
+          'Your previous plan was charged upfront, so a plan change will prorate any unused time in credits. If the prorated credits exceed the new plan charge, the excessive credits are added to your organization for future use.',
+      })
+    }
+
+    if (hasTax && tax) {
+      if (taxableAmount !== newPlanCost) {
+        items.push({ type: 'amount', label: 'Subtotal', amount: taxableAmount! })
+      }
+      items.push({
+        type: 'amount',
+        label: `Tax (${tax.tax_rate_percentage}%)`,
+        amount: tax.tax_amount,
+      })
+    }
+
+    if (taxFailed) {
+      items.push({
+        type: 'notice',
+        label: 'Tax could not be estimated and may be applied separately',
+      })
+    }
+
+    if (customerBalance > 0) {
+      items.push({
+        type: 'amount',
+        label: 'Credits',
+        amount: -customerBalance,
+        tooltip: 'Credits will be used first before charging your card.',
+      })
+    }
+
+    // Prepend the plan cost row when there are adjustment items to show
+    if (changeType !== 'downgrade' && items.length > 0) {
+      items.unshift({
+        type: 'amount',
+        label: `${subscriptionPlanMeta?.name} Plan`,
+        amount: newPlanCost,
+      })
+    }
+
+    return items
+  }, [
+    currentPlanId,
+    currentPlanName,
+    proratedCredit,
+    hasTax,
+    tax,
+    taxableAmount,
+    newPlanCost,
+    taxFailed,
+    customerBalance,
+    changeType,
+    subscriptionPlanMeta?.name,
+  ])
 
   return (
     <Dialog
@@ -291,87 +361,37 @@ export const SubscriptionPlanUpdateDialog = ({
               {subscriptionPreviewInitialized && (
                 <>
                   <div className="mt-2 mb-4 text-foreground-light text-sm">
-                    {hasBreakdownItems && changeType !== 'downgrade' && (
-                      <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
-                        <div className="py-2 pl-0 flex items-center gap-1">
-                          <span>{subscriptionPlanMeta?.name} Plan</span>
-                        </div>
-                        <div className="py-2 pr-0 text-right" translate="no">
-                          {formatCurrency(newPlanCost)}
-                        </div>
-                      </div>
-                    )}
-
-                    {subscription?.plan?.id !== 'free' && proratedCredit > 0 && (
-                      <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
-                        <div className="py-2 pl-0 flex items-center gap-1">
-                          <span>Unused Time on {subscription?.plan?.name} Plan</span>
-                          <InfoTooltip className="max-w-sm">
-                            Your previous plan was charged upfront, so a plan change will prorate
-                            any unused time in credits. If the prorated credits exceed the new plan
-                            charge, the excessive credits are added to your organization for future
-                            use.
-                          </InfoTooltip>
-                        </div>
-                        <div className="py-2 pr-0 text-right" translate="no">
-                          -{formatCurrency(proratedCredit)}
-                        </div>
-                      </div>
-                    )}
-
-                    {hasTax && subscriptionPreview?.upfront_charge?.tax != null && (
-                      <>
-                        {subscriptionPreview.upfront_charge.taxable_amount !== newPlanCost && (
-                          <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
-                            <div className="py-2 pl-0 flex items-center gap-1">
-                              <span>Subtotal</span>
-                            </div>
-                            <div className="py-2 pr-0 text-right" translate="no">
-                              {formatCurrency(subscriptionPreview.upfront_charge.taxable_amount)}
-                            </div>
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
+                    {breakdownItems.map((item, i) =>
+                      item.type === 'amount' ? (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between gap-2 border-b border-muted text-xs"
+                        >
                           <div className="py-2 pl-0 flex items-center gap-1">
-                            <span>
-                              Tax ({subscriptionPreview.upfront_charge.tax.tax_rate_percentage}%)
-                            </span>
+                            <span>{item.label}</span>
+                            {item.tooltip && (
+                              <InfoTooltip className="max-w-sm">{item.tooltip}</InfoTooltip>
+                            )}
                           </div>
                           <div className="py-2 pr-0 text-right" translate="no">
-                            {formatCurrency(subscriptionPreview.upfront_charge.tax.tax_amount)}
+                            {formatCurrency(item.amount)}
                           </div>
                         </div>
-                      </>
-                    )}
-
-                    {taxFailed && (
-                      <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
-                        <div className="py-2 pl-0 text-foreground-lighter">
-                          Tax could not be estimated and may be applied separately
+                      ) : (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between gap-2 border-b border-muted text-xs"
+                        >
+                          <div className="py-2 pl-0 text-foreground-lighter">{item.label}</div>
                         </div>
-                      </div>
-                    )}
-
-                    {/* Ignore rare case with negative balance (debt) */}
-                    {customerBalance > 0 && (
-                      <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
-                        <div className="py-2 pl-0 flex items-center gap-1">
-                          <span>Credits</span>
-                          <InfoTooltip>
-                            Credits will be used first before charging your card.
-                          </InfoTooltip>
-                        </div>
-                        <div className="py-2 pr-0 text-right" translate="no">
-                          -{formatCurrency(customerBalance)}
-                        </div>
-                      </div>
+                      )
                     )}
 
                     <div className="flex items-center justify-between gap-2 border-b border-muted text-foreground">
                       <div className="py-2 pl-0">Charge today</div>
                       <div className="py-2 pr-0 text-right" translate="no">
                         {formatCurrency(totalCharge)}
-                        {subscription?.plan?.id !== 'free' && (
+                        {currentPlanId !== 'free' && (
                           <>
                             {' '}
                             <Link
