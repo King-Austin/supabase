@@ -213,7 +213,7 @@ export const SubscriptionPlanUpdateDialog = ({
 
   const proratedCredit = subscriptionPreview?.upfront_charge?.prorated_credit ?? 0
 
-  const newPlanCost = Number(subscriptionPlanMeta?.priceMonthly) ?? 0
+  const newPlanCost = Number(subscriptionPlanMeta?.priceMonthly) || 0
 
   const customerBalance = subscriptionPreview?.upfront_charge?.customer_balance ?? 0
 

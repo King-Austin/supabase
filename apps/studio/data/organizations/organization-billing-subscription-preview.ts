@@ -43,7 +43,7 @@ export type OrganizationBillingSubscriptionPreviewResponse = {
     ref: string
   }[]
   billed_via_partner?: boolean
-  upfront_charge: {
+  upfront_charge?: {
     customer_balance: number
     prorated_credit: number
     taxable_amount: number
