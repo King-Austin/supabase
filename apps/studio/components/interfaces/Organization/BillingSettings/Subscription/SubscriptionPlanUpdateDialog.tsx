@@ -217,13 +217,14 @@ export const SubscriptionPlanUpdateDialog = ({
 
   const customerBalance = subscriptionPreview?.upfront_charge?.customer_balance ?? 0
 
-  const taxAmount = subscriptionPreview?.upfront_charge?.tax?.tax_amount ?? 0
+  const taxStatus = subscriptionPreview?.upfront_charge?.tax_status
+  const hasTax = taxStatus === 'calculated'
+  const taxFailed = taxStatus === 'failed'
 
   const totalCharge = subscriptionPreview?.upfront_charge?.total ?? 0
 
   // Only show the itemized breakdown when there's more than just the plan cost
-  const hasBreakdownItems =
-    taxAmount > 0 || subscription?.plan?.id !== 'free' || customerBalance > 0
+  const hasBreakdownItems = hasTax || subscription?.plan?.id !== 'free' || customerBalance > 0
 
   return (
     <Dialog
@@ -318,31 +319,38 @@ export const SubscriptionPlanUpdateDialog = ({
                       </div>
                     )}
 
-                    {subscriptionPreview?.upfront_charge?.tax != null &&
-                      subscriptionPreview.upfront_charge.tax.tax_amount > 0 && (
-                        <>
-                          {subscriptionPreview.upfront_charge.taxable_amount !== newPlanCost && (
-                            <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
-                              <div className="py-2 pl-0 flex items-center gap-1">
-                                <span>Subtotal</span>
-                              </div>
-                              <div className="py-2 pr-0 text-right" translate="no">
-                                {formatCurrency(subscriptionPreview.upfront_charge.taxable_amount)}
-                              </div>
-                            </div>
-                          )}
+                    {hasTax && subscriptionPreview?.upfront_charge?.tax != null && (
+                      <>
+                        {subscriptionPreview.upfront_charge.taxable_amount !== newPlanCost && (
                           <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
                             <div className="py-2 pl-0 flex items-center gap-1">
-                              <span>
-                                Tax ({subscriptionPreview.upfront_charge.tax.tax_rate_percentage}%)
-                              </span>
+                              <span>Subtotal</span>
                             </div>
                             <div className="py-2 pr-0 text-right" translate="no">
-                              {formatCurrency(subscriptionPreview.upfront_charge.tax.tax_amount)}
+                              {formatCurrency(subscriptionPreview.upfront_charge.taxable_amount)}
                             </div>
                           </div>
-                        </>
-                      )}
+                        )}
+                        <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
+                          <div className="py-2 pl-0 flex items-center gap-1">
+                            <span>
+                              Tax ({subscriptionPreview.upfront_charge.tax.tax_rate_percentage}%)
+                            </span>
+                          </div>
+                          <div className="py-2 pr-0 text-right" translate="no">
+                            {formatCurrency(subscriptionPreview.upfront_charge.tax.tax_amount)}
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {taxFailed && (
+                      <div className="flex items-center justify-between gap-2 border-b border-muted text-xs">
+                        <div className="py-2 pl-0 text-foreground-lighter">
+                          Tax could not be estimated and may be applied separately
+                        </div>
+                      </div>
+                    )}
 
                     {/* Ignore rare case with negative balance (debt) */}
                     {customerBalance > 0 && (
@@ -556,7 +564,7 @@ export const SubscriptionPlanUpdateDialog = ({
                                     <TableRow>
                                       <TableCell className="font-medium py-2 px-0">
                                         Total per month (excluding other usage
-                                        {taxAmount > 0 ? ' and applicable tax' : ''})
+                                        {hasTax || taxFailed ? ' and applicable tax' : ''})
                                       </TableCell>
                                       <TableCell
                                         className="text-right font-medium py-2 px-0"
@@ -588,7 +596,7 @@ export const SubscriptionPlanUpdateDialog = ({
                             ) ?? 0
                           )
                         )}
-                        {subscriptionPreview?.upfront_charge?.tax != null && (
+                        {(hasTax || taxFailed) && (
                           <span className="text-foreground-lighter"> + applicable tax</span>
                         )}
                       </div>
