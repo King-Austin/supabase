@@ -1,5 +1,6 @@
 import { TextSearch } from 'lucide-react'
 import { Button } from 'ui'
+
 import type { AdvisorTab } from '@/state/advisor-state'
 
 interface EmptyAdvisorProps {

@@ -1,12 +1,6 @@
 import dayjs from 'dayjs'
 import { Gauge, Inbox, Shield } from 'lucide-react'
 import type { ElementType } from 'react'
-import { lintInfoMap } from '@/components/interfaces/Linter/Linter.utils'
-import type { IPData } from '@/data/banned-ips/banned-ips-query'
-import type { Lint } from '@/data/lint/lint-query'
-import type { Notification, NotificationData } from '@/data/notifications/notifications-v2-query'
-import type { Bucket } from '@/data/storage/buckets-query'
-import type { AdvisorSeverity, AdvisorTab } from '@/state/advisor-state'
 
 import type {
   AdvisorItem,
@@ -14,6 +8,12 @@ import type {
   AdvisorNotificationItem,
   AdvisorSignalItem,
 } from './AdvisorPanel.types'
+import { lintInfoMap } from '@/components/interfaces/Linter/Linter.utils'
+import type { IPData } from '@/data/banned-ips/banned-ips-query'
+import type { Lint } from '@/data/lint/lint-query'
+import type { Notification, NotificationData } from '@/data/notifications/notifications-v2-query'
+import type { Bucket } from '@/data/storage/buckets-query'
+import type { AdvisorSeverity, AdvisorTab } from '@/state/advisor-state'
 
 export const MAX_HOMEPAGE_ADVISOR_ITEMS = 4
 
@@ -60,7 +60,14 @@ export const createPublicBucketSignalFingerprint = (bucketId: string) =>
 export const getAdvisorDebugBannedIPs = (rawValue?: string): string[] => {
   if (!rawValue) return []
 
-  return [...new Set(rawValue.split(',').map((ip) => ip.trim()).filter(Boolean))]
+  return [
+    ...new Set(
+      rawValue
+        .split(',')
+        .map((ip) => ip.trim())
+        .filter(Boolean)
+    ),
+  ]
 }
 
 const getSignalResourceLabel = (item: AdvisorSignalItem) =>

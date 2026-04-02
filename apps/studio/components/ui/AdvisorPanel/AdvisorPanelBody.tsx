@@ -5,8 +5,8 @@ import { GenericSkeletonLoader } from 'ui-patterns'
 import type { AdvisorItem } from './AdvisorPanel.types'
 import {
   formatItemDate,
-  getAdvisorPanelItemDisplayTitle,
   getAdvisorItemSecondaryText,
+  getAdvisorPanelItemDisplayTitle,
   severityBadgeVariants,
   severityColorClasses,
   severityLabels,
