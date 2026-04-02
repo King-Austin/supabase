@@ -571,11 +571,9 @@ export const SubscriptionPlanUpdateDialog = ({
                                         translate="no"
                                       >
                                         {formatCurrency(
-                                          Math.round(
-                                            subscriptionPreview?.breakdown?.reduce(
-                                              (prev, cur) => prev + cur.total_price,
-                                              0
-                                            ) ?? 0
+                                          subscriptionPreview?.breakdown?.reduce(
+                                            (prev, cur) => prev + cur.total_price,
+                                            0
                                           ) ?? 0
                                         )}
                                       </TableCell>
@@ -589,12 +587,10 @@ export const SubscriptionPlanUpdateDialog = ({
                       </div>
                       <div className="py-2 pr-0 text-right" translate="no">
                         {formatCurrency(
-                          Math.round(
-                            subscriptionPreview?.breakdown.reduce(
-                              (prev: number, cur) => prev + cur.total_price,
-                              0
-                            ) ?? 0
-                          )
+                          subscriptionPreview?.breakdown.reduce(
+                            (prev: number, cur) => prev + cur.total_price,
+                            0
+                          ) ?? 0
                         )}
                         {(hasTax || taxFailed) && (
                           <span className="text-foreground-lighter"> + applicable tax</span>
